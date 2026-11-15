@@ -72,6 +72,12 @@
   .chip.mod { background: #4a1b1b; color: #f87171; }
   .chip.special { color: #fbbf24; }
   .chip.act { background: #3b2f63; color: #c4b5fd; font-size: 14px; }
+  .chip.tbl { background: #334155; }
+  .chip.tbl.mod { background: #4a1b1b; }
+  .chip.tbl.act { background: #3b2f63; }
+  .disc { display: inline-block; margin: 0 10px 6px 0; color: var(--text); }
+  .disc b { font-size: 16px; }
+  .disc i { font-style: normal; color: var(--muted); font-size: 12px; }
   .hand .none { color: var(--muted); align-self: center; font-size: 13px; }
 
   .controls { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 12px; }
@@ -106,8 +112,16 @@
 <h2>Modifiers &amp; actions</h2>
 <div class="grid mods" id="mods"></div>
 
+<h2>On the table <span id="tableCount"></span> <span class="sub" style="text-transform:none;letter-spacing:0">— other players' cards this round, in order · tap to remove</span></h2>
+<div class="hand" id="table"></div>
+
 <h2>My hand <span class="sub" style="text-transform:none;letter-spacing:0">— tap a card to remove it</span></h2>
 <div class="hand" id="hand"></div>
+
+<details class="info" id="discardBox">
+  <summary>Discard pile <span id="discardCount"></span></summary>
+  <div id="discard" style="margin-top:8px"></div>
+</details>
 
 <div class="controls">
   <button id="undo">↶ Undo</button>
@@ -119,7 +133,8 @@
 <details class="info">
   <summary>How to use / how it works</summary>
   <p>Built for <b>Flip 7: With a Vengeance</b> (108 cards): one each of 0 and 1, then <i>n</i> copies of each number up to thirteen 13s (one 7 is the <b>Unlucky 7</b>, one 13 is the <b>Lucky 13</b>), one each of −2, −4, −6, −8, −10 and ÷2, and 10 action cards.</p>
-  <p><b>Table / Discard:</b> tap every card you see come out for other players (and anything discarded). <b>My Hand:</b> tap the cards in front of you. Cards stay out of the deck between rounds until the draw pile runs out.</p>
+  <p><b>Table / Discard:</b> tap every card you see come out for other players (and anything discarded). They're listed under <b>On the table</b> in the order you tapped them, so you can check what's out if the deal goes fast. <b>My Hand:</b> tap the cards in front of you.</p>
+  <p><b>End round</b> moves the table and your hand to the <b>Discard pile</b> (still out of the deck). <b>Reshuffle deck</b> when the draw pile runs out — it puts the discard pile back, but cards still on the table and in your hand stay out. Cards stay out of the deck between rounds until you reshuffle.</p>
   <p>If a Swap, Steal or Discard changes your hand, tap a chip in "My hand" to remove a card, or add the new one in My Hand mode. Removing a chip puts that card back in the deck; if it went to the discard pile, also tap it in Table mode.</p>
   <p>In My Hand mode the app applies the special cards for you. <b>Unlucky 7</b> discards your other number and modifier cards. <b>Lucky 13</b> lets you hold a second 13; a third 13 busts. A duplicate number busts.</p>
   <p><b>Scoring used:</b> add your number cards, apply ÷2 (rounded down), subtract the negatives, never below 0. Seven number cards = Flip 7, +15. Holding the <b>0</b> makes your round score 0 unless you Flip 7, and you must keep hitting.</p>
@@ -148,16 +163,17 @@
   // ---------- State ----------
   const KEY = 'flip7vengeance.v1';
   let state = load() || fresh();
-  function fresh() { return { seen: {}, hand: [], history: [], mode: 'table' }; }
-  function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); return s && s.seen ? s : null; } catch { return null; } }
+  function fresh() { return { seen: {}, table: [], hand: [], history: [], mode: 'table' }; }
+  function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.seen) { s.table = s.table || []; return s; } return null; } catch { return null; } }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
   function snapshot() {
-    state.history.push(JSON.stringify({ seen: state.seen, hand: state.hand }));
+    state.history.push(JSON.stringify({ seen: state.seen, table: state.table, hand: state.hand }));
     if (state.history.length > 200) state.history.shift();
   }
 
   const handCount = id => state.hand.filter(x => x === id).length;
-  const remaining = id => BY_ID[id].total - (state.seen[id] || 0) - handCount(id);
+  const tableCount = id => state.table.filter(x => x === id).length;
+  const remaining = id => BY_ID[id].total - (state.seen[id] || 0) - tableCount(id) - handCount(id);
   const addSeen = (id, k = 1) => { state.seen[id] = (state.seen[id] || 0) + k; };
   const handVals = v => state.hand.filter(id => BY_ID[id].kind === 'num' && BY_ID[id].v === v).length;
 
@@ -166,7 +182,7 @@
     if (remaining(id) <= 0) { toast('None of those left in the deck'); return; }
     snapshot();
     const c = BY_ID[id];
-    if (state.mode === 'table') { addSeen(id); }
+    if (state.mode === 'table') { state.table.push(id); }
     else if (c.kind === 'act') { addSeen(id); toast('Action card counted as played'); }
     else if (id === 'u7') {
       const keep = [];
@@ -189,19 +205,21 @@
     commit();
   }
   function removeFromHand(i) { snapshot(); state.hand.splice(i, 1); commit(); }
+  function removeFromTable(i) { snapshot(); state.table.splice(i, 1); commit(); }
   function undo() {
     const h = state.history.pop();
     if (!h) { toast('Nothing to undo'); return; }
-    Object.assign(state, JSON.parse(h)); commit();
+    Object.assign(state, { table: [] }, JSON.parse(h)); commit();
   }
   function endRound() {
     snapshot();
+    state.table.forEach(id => addSeen(id));
     state.hand.forEach(id => addSeen(id));
-    state.hand = [];
-    commit(); toast('Round ended — your cards moved to discard');
+    state.table = []; state.hand = [];
+    commit(); toast('Round ended — table and your cards moved to discard');
   }
   function reshuffle() {
-    if (!confirm('Reshuffle: put all discarded/seen cards back into the deck?')) return;
+    if (!confirm('Reshuffle: put the discard pile back into the deck? (Cards on the table and in your hand stay out.)')) return;
     snapshot(); state.seen = {}; commit(); toast('Deck reshuffled');
   }
   function newGame() {
@@ -342,6 +360,24 @@
     CARDS.filter(c => c.kind === 'num').forEach(c => nums.appendChild(cardBtn(c)));
     const mods = $('mods'); mods.innerHTML = '';
     CARDS.filter(c => c.kind !== 'num').forEach(c => mods.appendChild(cardBtn(c)));
+
+    const table = $('table'); table.innerHTML = '';
+    $('tableCount').textContent = state.table.length ? '(' + state.table.length + ')' : '';
+    if (!state.table.length) table.innerHTML = '<span class="none">Nothing yet — in "Table / Discard" mode, tap cards as they\'re dealt</span>';
+    state.table.forEach((id, i) => {
+      const c = BY_ID[id];
+      const b = document.createElement('button');
+      b.className = 'chip tbl ' + c.kind + (c.special ? ' special' : ''); b.textContent = c.label;
+      b.onclick = () => removeFromTable(i);
+      table.appendChild(b);
+    });
+
+    const disc = CARDS.filter(c => state.seen[c.id] > 0);
+    const nDisc = disc.reduce((t, c) => t + state.seen[c.id], 0);
+    $('discardCount').textContent = '(' + nDisc + ' cards)';
+    $('discard').innerHTML = nDisc
+      ? disc.map(c => `<span class="disc"><b>${c.label}</b> <i>×${state.seen[c.id]}</i></span>`).join('')
+      : '<span class="sub">Empty</span>';
 
     const hand = $('hand'); hand.innerHTML = '';
     if (!state.hand.length) hand.innerHTML = '<span class="none">Switch to "My Hand" and tap your cards</span>';
