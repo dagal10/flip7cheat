@@ -41,13 +41,6 @@
   .stats b { font-size: 18px; }
   .sub { color: var(--muted); font-size: 12.5px; }
 
-  /* Mode toggle */
-  .mode { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 4px 0 10px; }
-  .mode button { padding: 12px; border-radius: var(--radius); background: var(--panel); font-weight: 700; }
-  .mode button.on[data-mode="table"] { background: #334155; outline: 2px solid #94a3b8; }
-  .mode button.on[data-mode="hand"] { background: #1e3a8a; outline: 2px solid var(--accent); }
-  .mode small { display: block; font-weight: 400; color: var(--muted); font-size: 11.5px; }
-
   h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 14px 0 6px; }
 
   .grid { display: grid; gap: 6px; }
@@ -91,9 +84,68 @@
     background: #000c; color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s; max-width: 90vw; }
   .toast.show { opacity: 1; }
 
+  /* Turn bar */
+  .turnbar { display: flex; gap: 6px; align-items: stretch; margin: 2px 0 8px; }
+  .turnbar .who { flex: 1; background: var(--panel); border-radius: var(--radius); padding: 8px 12px; }
+  .turnbar .who b { font-size: 18px; }
+  .turnbar button { border-radius: var(--radius); padding: 0 14px; font-weight: 700; background: var(--panel2); }
+  .turnbar .stay { background: var(--stand); color: #3b2300; }
+
+  /* Players */
+  .players { display: grid; gap: 6px; }
+  .player { background: var(--panel); border-radius: var(--radius); padding: 6px 8px 8px; border: 2px solid transparent; }
+  .player.turn { border-color: var(--accent); }
+  .player.target { border-color: #a855f7; }
+  .player.me { background: #17213a; }
+  .player.out { opacity: .55; }
+  .phead { display: flex; align-items: center; gap: 8px; width: 100%; background: none; padding: 2px 0 6px; text-align: left; }
+  .phead .nm { font-weight: 700; }
+  .phead .badge { font-size: 11px; padding: 2px 7px; border-radius: 999px; background: var(--panel2); color: var(--muted); }
+  .badge.stayed { background: #4a3a0b; color: #fbbf24; }
+  .badge.bust { background: #4a1b1b; color: #fca5a5; }
+  .badge.flip7 { background: #14532d; color: #86efac; }
+  .badge.now { background: var(--accent); color: #fff; }
+  .badge.forced { background: #a855f7; color: #fff; }
+  .phead .pts { margin-left: auto; color: var(--muted); font-size: 13px; }
+  .phead .pts b { color: var(--text); }
+  .cards { display: flex; flex-wrap: wrap; gap: 5px; min-height: 34px; }
+  .cards .chip { font-size: 16px; padding: 5px 9px; }
+  .cards .none { color: var(--muted); font-size: 12.5px; align-self: center; }
+  .chip.pick { outline: 3px solid #fbbf24; }
+  body.picking .chip { animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: .6; } }
+
+  /* Pick banner + sheet */
+  .pickbar { background: #4a3a0b; color: #fde68a; border-radius: var(--radius); padding: 10px 12px; margin-bottom: 8px; display: flex; gap: 8px; align-items: center; }
+  .pickbar span { flex: 1; }
+  .pickbar button { background: #00000040; border-radius: 8px; padding: 6px 10px; }
+  .sheet-bg { position: fixed; inset: 0; background: #000a; z-index: 20; display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { background: var(--panel); width: 100%; max-width: 720px; border-radius: 16px 16px 0 0; padding: 14px 14px calc(16px + env(safe-area-inset-bottom)); max-height: 85vh; overflow: auto; }
+  .sheet h3 { margin: 0 0 4px; font-size: 17px; }
+  .sheet p { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+  .sheet .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .sheet .opts button { background: var(--panel2); border-radius: 10px; padding: 12px 8px; font-weight: 600; text-align: center; }
+  .sheet .opts button small { display: block; font-weight: 400; color: var(--muted); font-size: 11.5px; }
+  .sheet .opts .full { grid-column: 1 / -1; }
+  .sheet .cancel { margin-top: 8px; width: 100%; padding: 12px; border-radius: 10px; background: #00000040; color: var(--muted); }
+
+  /* Setup */
+  .setup .row { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+  .setup input[type=text] { flex: 1; background: var(--panel2); color: var(--text); border: 1px solid #3a3f4d; border-radius: 8px; padding: 9px 10px; font: inherit; min-width: 0; }
+  .setup label { display: flex; align-items: center; gap: 4px; color: var(--text); font-size: 13px; white-space: nowrap; }
+  .setup .count { display: flex; gap: 6px; flex-wrap: wrap; }
+  .setup .count button { background: var(--panel2); border-radius: 8px; padding: 8px 12px; font-weight: 700; }
+  .setup .count button.on { background: var(--accent); }
+  .setup .go { width: 100%; margin-top: 8px; padding: 12px; border-radius: 10px; background: var(--hit); color: #052e14; font-weight: 800; }
+
   @media (max-width: 420px) {
-    .nums { grid-template-columns: repeat(4, 1fr); }
-    .mods { grid-template-columns: repeat(4, 1fr); }
+    .nums { grid-template-columns: repeat(6, 1fr); gap: 4px; }
+    .mods { grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .card { padding: 6px 1px 4px; }
+    .card .v { font-size: 19px; }
+    .card.mod .v { font-size: 15px; }
+    .card.act .v { font-size: 11px; padding: 3px 0; }
+    .card .c { font-size: 10px; }
     .verdict { font-size: 26px; min-width: 90px; }
   }
 </style>
@@ -101,22 +153,19 @@
 <body>
 
 <div id="rec"></div>
+<div id="pickbar"></div>
 
-<div class="mode">
-  <button data-mode="table">Table / Discard<small>other players' cards</small></button>
-  <button data-mode="hand">My Hand<small>cards in front of me</small></button>
+<div class="turnbar">
+  <div class="who" id="who"></div>
+  <button class="stay" id="stayBtn">Stay</button>
+  <button id="skipBtn" title="Move to the next player without a card">Skip ›</button>
 </div>
 
-<h2>Numbers <span class="sub" style="text-transform:none;letter-spacing:0">— tap to add · count = left in deck</span></h2>
 <div class="grid nums" id="nums"></div>
-<h2>Modifiers &amp; actions</h2>
-<div class="grid mods" id="mods"></div>
+<div class="grid mods" id="mods" style="margin-top:6px"></div>
 
-<h2>On the table <span id="tableCount"></span> <span class="sub" style="text-transform:none;letter-spacing:0">— other players' cards this round, in order · tap to remove</span></h2>
-<div class="hand" id="table"></div>
-
-<h2>My hand <span class="sub" style="text-transform:none;letter-spacing:0">— tap a card to remove it</span></h2>
-<div class="hand" id="hand"></div>
+<h2>Players <span class="sub" style="text-transform:none;letter-spacing:0">— tap a name for options · tap a card to move / swap / discard it</span></h2>
+<div class="players" id="players"></div>
 
 <details class="info" id="discardBox">
   <summary>Discard pile <span id="discardCount"></span></summary>
@@ -127,20 +176,24 @@
   <button id="undo">↶ Undo</button>
   <button id="endRound" class="primary">End round</button>
   <button id="reshuffle" class="warn">Reshuffle deck</button>
-  <button id="newGame" class="warn">New game</button>
+  <button id="setupBtn">Players / new game</button>
 </div>
 
 <details class="info">
   <summary>How to use / how it works</summary>
-  <p>Built for <b>Flip 7: With a Vengeance</b> (108 cards): one each of 0 and 1, then <i>n</i> copies of each number up to thirteen 13s (one 7 is the <b>Unlucky 7</b>, one 13 is the <b>Lucky 13</b>), one each of −2, −4, −6, −8, −10 and ÷2, and 10 action cards.</p>
-  <p><b>Table / Discard:</b> tap every card you see come out for other players (and anything discarded). They're listed under <b>On the table</b> in the order you tapped them, so you can check what's out if the deal goes fast. <b>My Hand:</b> tap the cards in front of you.</p>
-  <p><b>End round</b> moves the table and your hand to the <b>Discard pile</b> (still out of the deck). <b>Reshuffle deck</b> when the draw pile runs out — it puts the discard pile back, but cards still on the table and in your hand stay out. Cards stay out of the deck between rounds until you reshuffle.</p>
-  <p>If a Swap, Steal or Discard changes your hand, tap a chip in "My hand" to remove a card, or add the new one in My Hand mode. Removing a chip puts that card back in the deck; if it went to the discard pile, also tap it in Table mode.</p>
-  <p>In My Hand mode the app applies the special cards for you. <b>Unlucky 7</b> discards your other number and modifier cards. <b>Lucky 13</b> lets you hold a second 13; a third 13 busts. A duplicate number busts.</p>
-  <p><b>Scoring used:</b> add your number cards, apply ÷2 (rounded down), subtract the negatives, never below 0. Seven number cards = Flip 7, +15. Holding the <b>0</b> makes your round score 0 unless you Flip 7, and you must keep hitting.</p>
-  <p><b>Recommendation</b> comes from an optimal look-ahead: the expected score of hitting and then playing perfectly against the exact remaining deck. Action cards are assumed to be played on opponents. It maximizes your expected round score only. If you're far behind near 200, lean toward hitting; if you're about to win, lean toward standing.</p>
+  <p><b>Setup:</b> enter the players in seating (turn) order and pick which one is you.</p>
+  <p><b>Dealing:</b> the bar above the cards shows who gets the next card. Tap the card that's dealt and it goes to that player, then the turn moves to the next player still in the round. Tap <b>Stay</b> when the current player stays. If the order goes wrong, tap a player's name → <b>Give them the next card</b>.</p>
+  <p><b>Action cards:</b> tap <b>Action</b> when one is dealt and choose what it was:
+  <b>Flip Four</b> / <b>Just One More</b> send the next 4 / 1 cards to the target, then play returns to the normal order.
+  <b>Freeze</b> makes the target stay. <b>Swap</b>, <b>Steal</b> and <b>Discard</b> ask you to tap the cards involved.</p>
+  <p><b>Fixing things:</b> tap any card on the table to move it to another player, swap it with another card, discard it, or remove it (if you tapped the wrong card). Undo works for everything.</p>
+  <p><b>Special cards</b> are applied automatically: <b>Unlucky 7</b> discards that player's other number and modifier cards; <b>Lucky 13</b> allows a second 13 (a third busts); a duplicate number busts; 7 number cards is a Flip 7 (+15) and ends the round.</p>
+  <p><b>End round</b> adds round scores to the totals and moves all cards to the discard pile, which stays out of the deck until you <b>Reshuffle deck</b> (when the draw pile runs out). The next round starts with the next player.</p>
+  <p><b>Scoring used:</b> add number cards, apply ÷2 (rounded down), subtract the negatives, never below 0. Holding the <b>0</b> scores 0 unless you Flip 7, and you must keep hitting.</p>
+  <p><b>Recommendation</b> is for you only: the expected score of hitting and then playing perfectly against the exact remaining deck (looking up to 6 cards ahead). It assumes action cards are played on opponents and maximizes this round's score. If you're far behind near 200, lean toward hitting; if you're about to win, lean toward standing.</p>
 </details>
 
+<div id="sheet"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -161,72 +214,34 @@
   const BY_ID = Object.fromEntries(CARDS.map(c => [c.id, c]));
 
   // ---------- State ----------
-  const KEY = 'flip7vengeance.v1';
-  let state = load() || fresh();
-  function fresh() { return { seen: {}, table: [], hand: [], history: [], mode: 'table' }; }
-  function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.seen) { s.table = s.table || []; return s; } return null; } catch { return null; } }
+  // players: [{ name, cards: [id], status: 'active'|'stayed'|'bust'|'flip7', total }]
+  // turn: index of the player whose turn it is (null = round over)
+  // forced: stack of { target, left, label } for Flip Four / Just One More
+  const KEY = 'flip7vengeance.v2';
+  let state = load();
+  let ui = { pick: null };
+  function blankPlayers(names) { return names.map(name => ({ name, cards: [], status: 'active', total: 0 })); }
+  function load() {
+    try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.players && s.players.length) return s; } catch {}
+    return null;
+  }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
   function snapshot() {
-    state.history.push(JSON.stringify({ seen: state.seen, table: state.table, hand: state.hand }));
+    const { history, ...rest } = state;
+    state.history.push(JSON.stringify(rest));
     if (state.history.length > 200) state.history.shift();
   }
+  const me = () => state.players[state.me];
+  const pname = i => state.players[i].name + (i === state.me ? ' (you)' : '');
 
-  const handCount = id => state.hand.filter(x => x === id).length;
-  const tableCount = id => state.table.filter(x => x === id).length;
-  const remaining = id => BY_ID[id].total - (state.seen[id] || 0) - tableCount(id) - handCount(id);
-  const addSeen = (id, k = 1) => { state.seen[id] = (state.seen[id] || 0) + k; };
-  const handVals = v => state.hand.filter(id => BY_ID[id].kind === 'num' && BY_ID[id].v === v).length;
-
-  // ---------- Actions ----------
-  function tapCard(id) {
-    if (remaining(id) <= 0) { toast('None of those left in the deck'); return; }
-    snapshot();
-    const c = BY_ID[id];
-    if (state.mode === 'table') { state.table.push(id); }
-    else if (c.kind === 'act') { addSeen(id); toast('Action card counted as played'); }
-    else if (id === 'u7') {
-      const keep = [];
-      for (const h of state.hand) { const k = BY_ID[h].kind; if (k === 'num' || k === 'mod') addSeen(h); else keep.push(h); }
-      state.hand = keep; state.hand.push(id);
-      toast('Unlucky 7! Other number & modifier cards discarded');
-    } else if (c.kind === 'num') {
-      const have = handVals(c.v);
-      let bust = false;
-      if (c.v === 13) {
-        const lucky = state.hand.includes('l13') || id === 'l13';
-        bust = have >= 2 || (have === 1 && !lucky);
-        if (!bust && have === 1) toast('Lucky 13 — second 13 is safe');
-      } else bust = have >= 1;
-      state.hand.push(id);
-      if (bust) toast('BUST! Tap "End round" when done.');
-    } else {
-      state.hand.push(id);
-    }
-    commit();
+  function inPlayCounts() {
+    const m = {};
+    for (const p of state.players) for (const id of p.cards) m[id] = (m[id] || 0) + 1;
+    return m;
   }
-  function removeFromHand(i) { snapshot(); state.hand.splice(i, 1); commit(); }
-  function removeFromTable(i) { snapshot(); state.table.splice(i, 1); commit(); }
-  function undo() {
-    const h = state.history.pop();
-    if (!h) { toast('Nothing to undo'); return; }
-    Object.assign(state, { table: [] }, JSON.parse(h)); commit();
-  }
-  function endRound() {
-    snapshot();
-    state.table.forEach(id => addSeen(id));
-    state.hand.forEach(id => addSeen(id));
-    state.table = []; state.hand = [];
-    commit(); toast('Round ended — table and your cards moved to discard');
-  }
-  function reshuffle() {
-    if (!confirm('Reshuffle: put the discard pile back into the deck? (Cards on the table and in your hand stay out.)')) return;
-    snapshot(); state.seen = {}; commit(); toast('Deck reshuffled');
-  }
-  function newGame() {
-    if (!confirm('Start a new game? This clears everything.')) return;
-    state = fresh(); commit();
-  }
-  function commit() { save(); render(); }
+  let IN_PLAY = {};
+  const remaining = id => BY_ID[id].total - (state.seen[id] || 0) - (IN_PLAY[id] || 0);
+  const addSeen = id => { state.seen[id] = (state.seen[id] || 0) + 1; };
 
   // ---------- Solver ----------
   // State bits: nm = number values held (bits 0..13), T = holding a second 13,
@@ -262,32 +277,42 @@
     return has ? -1 : s | (1 << t.v);
   }
 
-  function analyze() {
-    const R = {}; let N = 0;
-    for (const c of CARDS) { R[c.id] = Math.max(0, remaining(c.id)); N += R[c.id]; }
-
-    // Encode my hand
-    let s0 = 0, bust = false; const cnt = {};
-    for (const id of state.hand) {
+  // Encode a hand of card ids into a solver state
+  function encode(cards) {
+    let s = 0, bust = false; const cnt = {};
+    for (const id of cards) {
       const c = BY_ID[id];
       if (c.kind === 'num') {
         cnt[c.v] = (cnt[c.v] || 0) + 1;
-        if (cnt[c.v] === 2 && c.v === 13) s0 |= T; else if (cnt[c.v] >= 2) bust = true;
-        s0 |= 1 << c.v;
-        if (id === 'l13') s0 |= L | G;
-        if (id === 'u7') s0 |= U;
-      } else if (c.kind === 'mod') s0 |= 1 << (MSH + c.bit);
+        if (cnt[c.v] === 2 && c.v === 13) s |= T; else if (cnt[c.v] >= 2) bust = true;
+        s |= 1 << c.v;
+        if (id === 'l13') s |= L | G;
+        if (id === 'u7') s |= U;
+      } else if (c.kind === 'mod') s |= 1 << (MSH + c.bit);
     }
-    if ((cnt[13] || 0) >= 3 || ((s0 & T) && !(s0 & L))) bust = true;
+    if ((cnt[13] || 0) >= 3 || ((s & T) && !(s & L))) bust = true;
+    return { s, bust, flip7: !bust && numCount(s) >= 7 };
+  }
+  function roundScore(p) {
+    if (p.status === 'bust') return 0;
+    const e = encode(p.cards);
+    if (e.bust) return 0;
+    if (e.flip7) return rawScore(e.s) + 15;
+    return standScore(e.s);
+  }
+
+  function analyze(cards) {
+    const R = {}; let N = 0;
+    for (const c of CARDS) { R[c.id] = Math.max(0, remaining(c.id)); N += R[c.id]; }
+    let { s: s0, bust, flip7 } = encode(cards);
     if (!R.u7) s0 |= U;
     if (!R.l13) s0 |= G;
     if (bust) return { status: 'bust' };
-    if (numCount(s0) >= 7) return { status: 'flip7', score: rawScore(s0) + 15 };
+    if (flip7) return { status: 'flip7', score: rawScore(s0) + 15 };
     if (N - R.act === 0) return { status: 'empty' };
 
     const types = CARDS.filter(c => c.kind !== 'act');
     const nm0 = s0 & NM;
-    // Remaining count of a card type in the look-ahead state (cards drawn since now are gone)
     function avail(s, t) {
       if (t.kind === 'mod') return (s >>> (MSH + t.bit)) & 1 ? 0 : R[t.id];
       if (t.id === 'u7') return s & U ? 0 : R.u7;
@@ -295,7 +320,6 @@
       const drawnNow = (s >> t.v & 1) && !(nm0 >> t.v & 1) && t.v !== 7 && t.v !== 13 ? 1 : 0;
       return Math.max(0, R[t.id] - drawnNow);
     }
-
     const memo = new Map();
     function hitEV(s, d) {
       let tot = 0, acc = 0;
@@ -303,7 +327,7 @@
         const r = avail(s, t); if (!r) continue;
         tot += r;
         const ns = draw(s, t);
-        if (ns < 0) continue; // bust = 0
+        if (ns < 0) continue;
         acc += r * (numCount(ns) >= 7 ? rawScore(ns) + 15 : V(ns, d + 1));
       }
       return tot ? acc / tot : standScore(s);
@@ -317,8 +341,6 @@
       v = (s & 1) ? hitEV(s, d) : Math.max(standScore(s), hitEV(s, d));
       memo.set(key, v); return v;
     }
-
-    // Next-card odds (denominator includes action cards)
     let bustCards = 0, f7 = 0, tot1 = 0, acc1 = 0;
     for (const t of types) {
       const r = R[t.id]; if (!r) continue;
@@ -332,83 +354,368 @@
     const evHit = hitEV(s0, 0);
     return {
       status: 'ok', N, bustCards, pBust: bustCards / N, pF7: f7 / N, S, evHit,
-      ev1: tot1 ? acc1 / tot1 : S, uniq: numCount(s0), zero: !!(s0 & 1),
-      hit: evHit > S + 1e-9, states: memo.size
+      ev1: tot1 ? acc1 / tot1 : S, uniq: numCount(s0), zero: !!(s0 & 1), hit: evHit > S + 1e-9
     };
+  }
+
+  // ---------- Turn flow ----------
+  const isActive = i => state.players[i].status === 'active';
+  const target = () => state.forced.length ? state.forced[state.forced.length - 1].target : state.turn;
+
+  function nextActive(from) {
+    const n = state.players.length;
+    for (let k = 1; k <= n; k++) { const i = (from + k) % n; if (isActive(i)) return i; }
+    return null;
+  }
+  function advanceTurn() {
+    if (state.turn == null) return;
+    state.turn = nextActive(state.turn);
+    if (state.turn == null && !roundOver()) toast('Everyone is done — tap “End round”');
+  }
+  const roundOver = () => state.players.some(p => p.status === 'flip7');
+
+  // After a player's hand changes, update their status (bust / Flip 7)
+  function refreshStatus(i, announce) {
+    const p = state.players[i];
+    const e = encode(p.cards);
+    if (e.bust) {
+      if (p.status !== 'bust') { p.status = 'bust'; if (announce) toast(pname(i) + ' BUSTS!'); }
+    } else if (e.flip7) {
+      if (p.status !== 'flip7') {
+        p.status = 'flip7';
+        state.turn = null; state.forced = [];
+        if (announce) toast(pname(i) + ' got FLIP 7! Round over — tap “End round”');
+      }
+    } else if (p.status === 'bust' || p.status === 'flip7') p.status = 'active';
+  }
+
+  // Consume one card of the current forced draw (if any), then move play on
+  function cardDone(i) {
+    if (roundOver()) return;
+    if (state.forced.length) {
+      const top = state.forced[state.forced.length - 1];
+      top.left--;
+      if (top.left <= 0 || !isActive(top.target)) state.forced.pop();
+      // Clear any forced draws whose target is no longer in the round
+      while (state.forced.length && !isActive(state.forced[state.forced.length - 1].target)) state.forced.pop();
+      if (state.forced.length) return;
+      advanceTurn();
+    } else advanceTurn();
+  }
+
+  function giveCard(i, id) {
+    const p = state.players[i];
+    if (id === 'u7') {
+      const keep = [];
+      for (const h of p.cards) { const k = BY_ID[h].kind; if (k === 'num' || k === 'mod') addSeen(h); else keep.push(h); }
+      p.cards = keep;
+      toast('Unlucky 7! ' + pname(i) + ' discards their other number & modifier cards');
+    }
+    p.cards.push(id);
+    refreshStatus(i, true);
+  }
+
+  // ---------- User actions ----------
+  function tapCard(id) {
+    if (ui.pick) { toast('Finish or cancel the current action first'); return; }
+    if (remaining(id) <= 0) { toast('None of those left in the deck'); return; }
+    const t = target();
+    if (t == null) { toast(roundOver() ? 'Round over — tap “End round”' : 'No one is up — tap a player’s name to give them the card'); return; }
+    snapshot();
+    if (BY_ID[id].kind === 'act') { addSeen(id); commit(); actionSheet(t); return; }
+    giveCard(t, id);
+    cardDone(t);
+    commit();
+  }
+
+  function actionSheet(actor) {
+    const choose = (fn) => () => { closeSheet(); fn(); };
+    const resolveSimple = () => { cardDone(actor); commit(); };
+    sheet(`${pname(actor)} drew an action card`, 'What is it?', [
+      ['Flip Four', 'target draws the next 4', choose(() => pickPlayer('Flip Four — who must draw 4?', i => forcedDraw(actor, i, 4, 'Flip Four'), actor))],
+      ['Just One More', 'target takes the next card', choose(() => pickPlayer('Just One More — who takes the next card?', i => forcedDraw(actor, i, 1, 'Just One More'), actor))],
+      ['Freeze', 'target must stay', choose(() => pickPlayer('Freeze — who is frozen?', i => { state.players[i].status = 'stayed'; state.forced = state.forced.filter(x => x.target !== i); cardDone(actor); commit(); }, actor))],
+      ['Swap', 'swap two cards on the table', choose(() => startPick('swap', actor))],
+      ['Steal', `${state.players[actor].name} takes a card`, choose(() => startPick('steal', actor))],
+      ['Discard', 'discard a card from the table', choose(() => startPick('discard', actor))],
+      ['Other / no effect', 'just count it', choose(resolveSimple), 'full'],
+    ], () => { resolveSimple(); });
+  }
+
+  function forcedDraw(actor, tgt, n, label) {
+    // The action card itself used up one of the actor's draws (or one of an ongoing forced draw)
+    if (state.forced.length) {
+      const top = state.forced[state.forced.length - 1];
+      top.left--; if (top.left <= 0) state.forced.pop();
+    }
+    if (isActive(tgt)) state.forced.push({ target: tgt, left: n, label });
+    else toast(state.players[tgt].name + ' is not in the round');
+    if (!state.forced.length) advanceTurn();
+    commit();
+  }
+
+  function startPick(type, actor) {
+    const msg = { swap: 'Swap: tap the first card', steal: `Steal: tap the card ${state.players[actor].name} takes`, discard: 'Discard: tap the card to discard' }[type];
+    ui.pick = { type, actor, first: null, msg, finish: () => { cardDone(actor); } };
+    render();
+  }
+
+  function tapChip(i, j) {
+    if (ui.pick) return pickChip(i, j);
+    const id = state.players[i].cards[j];
+    const others = state.players.map((p, k) => k).filter(k => k !== i);
+    sheet(`${BY_ID[id].label} — ${pname(i)}`, 'What happened to this card?', [
+      ...others.map(k => [`Move to ${pname(k)}`, '', () => { closeSheet(); snapshot(); moveCard(i, j, k); commit(); }]),
+      ['Swap with…', 'tap another card next', () => { closeSheet(); ui.pick = { type: 'swap', first: [i, j], msg: 'Swap: tap the other card', finish: () => {} }; render(); }],
+      ['Discard', 'to the discard pile', () => { closeSheet(); snapshot(); const [c] = state.players[i].cards.splice(j, 1); addSeen(c); refreshStatus(i); commit(); }],
+      ['Remove (mistake)', 'back into the deck', () => { closeSheet(); snapshot(); state.players[i].cards.splice(j, 1); refreshStatus(i); commit(); }, 'full'],
+    ]);
+  }
+
+  function moveCard(i, j, k) {
+    const [c] = state.players[i].cards.splice(j, 1);
+    state.players[k].cards.push(c);
+    refreshStatus(i, true); refreshStatus(k, true);
+  }
+
+  function pickChip(i, j) {
+    const pk = ui.pick;
+    if (pk.type === 'discard') {
+      snapshot();
+      const [c] = state.players[i].cards.splice(j, 1); addSeen(c); refreshStatus(i, true);
+      ui.pick = null; pk.finish(); commit(); return;
+    }
+    if (pk.type === 'steal') {
+      if (i === pk.actor) { toast('Tap a card from another player'); return; }
+      snapshot(); moveCard(i, j, pk.actor);
+      ui.pick = null; pk.finish(); commit(); return;
+    }
+    // swap
+    if (!pk.first) { pk.first = [i, j]; pk.msg = 'Swap: tap the second card'; render(); return; }
+    const [a, b] = pk.first;
+    if (a === i && b === j) { pk.first = null; pk.msg = 'Swap: tap the first card'; render(); return; }
+    snapshot();
+    const ca = state.players[a].cards[b], cb = state.players[i].cards[j];
+    state.players[a].cards[b] = cb; state.players[i].cards[j] = ca;
+    refreshStatus(a, true); refreshStatus(i, true);
+    ui.pick = null; pk.finish(); commit();
+  }
+
+  function tapPlayer(i) {
+    if (ui.pick) return;
+    const p = state.players[i];
+    const opts = [
+      ['Give them the next card', 'make it their turn', () => { closeSheet(); snapshot(); state.forced = []; state.turn = i; if (!isActive(i)) p.status = 'active'; commit(); }],
+    ];
+    if (p.status === 'active') opts.push(['Stay', 'they stop for this round', () => { closeSheet(); snapshot(); stay(i); commit(); }]);
+    else opts.push(['Back in the round', 'mark as active', () => { closeSheet(); snapshot(); p.status = 'active'; if (state.turn == null && !roundOver()) state.turn = i; commit(); }]);
+    if (i !== state.me) opts.push(['This is me', 'use this seat for the odds', () => { closeSheet(); state.me = i; commit(); }]);
+    sheet(pname(i), `Round score ${roundScore(p)} · total ${p.total}`, opts);
+  }
+
+  function stay(i) {
+    state.players[i].status = 'stayed';
+    state.forced = state.forced.filter(f => f.target !== i);
+    if (state.turn === i && !state.forced.length) advanceTurn();
+  }
+
+  function undo() {
+    const h = state.history.pop();
+    if (!h) { toast('Nothing to undo'); return; }
+    ui.pick = null;
+    Object.assign(state, JSON.parse(h)); commit();
+  }
+  function endRound() {
+    if (!confirm('End the round? Round scores are added to the totals and all cards go to the discard pile.')) return;
+    snapshot();
+    for (const p of state.players) {
+      p.total += roundScore(p);
+      p.cards.forEach(addSeen);
+      p.cards = []; p.status = 'active';
+    }
+    state.round += 1;
+    state.start = (state.start + 1) % state.players.length;
+    state.turn = state.start; state.forced = []; ui.pick = null;
+    const win = state.players.filter(p => p.total >= 200).sort((a, b) => b.total - a.total)[0];
+    commit();
+    toast(win ? `${win.name} wins with ${win.total}!` : `Round ${state.round} — ${pname(state.turn)} starts`);
+  }
+  function reshuffle() {
+    if (!confirm('Reshuffle: put the discard pile back into the deck? (Cards on the table stay out.)')) return;
+    snapshot(); state.seen = {}; commit(); toast('Deck reshuffled');
+  }
+  function commit() { save(); render(); }
+
+  // ---------- Sheets (pop-up menus) ----------
+  function sheet(title, sub, opts, onCancel) {
+    const el = document.getElementById('sheet');
+    el.innerHTML = `<div class="sheet-bg"><div class="sheet"><h3></h3><p></p><div class="opts"></div><button class="cancel">Cancel</button></div></div>`;
+    el.querySelector('h3').textContent = title;
+    el.querySelector('p').textContent = sub || '';
+    const box = el.querySelector('.opts');
+    for (const [label, small, fn, cls] of opts) {
+      const b = document.createElement('button');
+      if (cls) b.className = cls;
+      b.innerHTML = '<span></span>' + (small ? '<small></small>' : '');
+      b.firstChild.textContent = label; if (small) b.lastChild.textContent = small;
+      b.onclick = fn; box.appendChild(b);
+    }
+    const cancel = () => { closeSheet(); if (onCancel) onCancel(); };
+    el.querySelector('.cancel').onclick = cancel;
+    el.querySelector('.sheet-bg').onclick = e => { if (e.target.classList.contains('sheet-bg')) cancel(); };
+  }
+  function closeSheet() { document.getElementById('sheet').innerHTML = ''; }
+  function pickPlayer(title, fn, actor) {
+    sheet(title, '', state.players.map((p, i) => [pname(i), p.status === 'active' ? '' : p.status, () => { closeSheet(); fn(i); }]),
+      () => { cardDone(actor); commit(); });
+  }
+
+  // ---------- Setup ----------
+  function setupSheet(first) {
+    const prev = state ? state.players.map(p => p.name) : [];
+    let n = prev.length || 4, meIdx = state ? state.me : 0;
+    const el = document.getElementById('sheet');
+    const draw = () => {
+      const names = [...el.querySelectorAll('input[type=text]')].map(x => x.value);
+      el.innerHTML = `<div class="sheet-bg"><div class="sheet setup">
+        <h3>${first ? 'Set up the table' : 'Players / new game'}</h3>
+        <p>Enter players in turn order (the order cards are dealt) and tick which one is you.</p>
+        <div class="count">${[2,3,4,5,6,7,8].map(k => `<button data-n="${k}" class="${k === n ? 'on' : ''}">${k}</button>`).join('')}</div>
+        <div id="rows"></div>
+        <button class="go">${first ? 'Start' : 'Start new game'}</button>
+        ${first ? '' : '<button class="cancel">Cancel</button>'}
+      </div></div>`;
+      const rows = el.querySelector('#rows');
+      for (let i = 0; i < n; i++) {
+        const r = document.createElement('div'); r.className = 'row';
+        r.innerHTML = `<span class="sub" style="width:18px">${i + 1}.</span><input type="text" maxlength="16"><label><input type="radio" name="me" ${i === meIdx ? 'checked' : ''}> me</label>`;
+        r.querySelector('input[type=text]').value = names[i] ?? prev[i] ?? (i === meIdx ? 'Me' : 'Player ' + (i + 1));
+        r.querySelector('input[type=radio]').onchange = () => { meIdx = i; };
+        rows.appendChild(r);
+      }
+      el.querySelectorAll('.count button').forEach(b => b.onclick = () => { n = +b.dataset.n; if (meIdx >= n) meIdx = 0; draw(); });
+      el.querySelector('.go').onclick = () => {
+        if (!first && !confirm('Start a new game? Scores and the deck are reset.')) return;
+        const nm = [...el.querySelectorAll('input[type=text]')].map((x, i) => x.value.trim() || 'Player ' + (i + 1));
+        state = { players: blankPlayers(nm), me: meIdx, seen: {}, turn: 0, start: 0, forced: [], round: 1, history: [] };
+        ui.pick = null; closeSheet(); commit();
+      };
+      const c = el.querySelector('.cancel'); if (c) c.onclick = closeSheet;
+    };
+    draw();
   }
 
   // ---------- Render ----------
   const $ = id => document.getElementById(id);
   const pct = x => (x * 100).toFixed(x < 0.1 && x > 0 ? 1 : 0) + '%';
 
-  function cardBtn(c) {
+  function cardBtn(c, mine) {
     const b = document.createElement('button');
     b.className = 'card ' + c.kind + (c.special ? ' special' : '');
     const r = remaining(c.id);
-    const mine = state.hand.includes(c.id);
-    if (mine) b.classList.add('mine');
-    if (c.kind === 'num' && handVals(c.v) > 0 && !(c.v === 13 && state.hand.includes('l13') && handVals(13) < 2) && c.id !== 'u7') b.classList.add('danger');
+    const myVals = mine.filter(id => BY_ID[id].kind === 'num' && BY_ID[id].v === c.v).length;
+    if (mine.includes(c.id)) b.classList.add('mine');
+    if (c.kind === 'num' && myVals > 0 && c.id !== 'u7' && !(c.v === 13 && mine.includes('l13') && myVals < 2)) b.classList.add('danger');
     if (r <= 0) b.classList.add('empty');
-    b.innerHTML = `<span class="v">${c.label}</span><span class="c">${c.tag ? c.tag + ' ' : ''}${r}/${c.total}</span>`;
+    b.innerHTML = `<span class="v">${c.label}</span><span class="c">${r}/${c.total}</span>`;
     b.onclick = () => tapCard(c.id);
     return b;
   }
 
   function render() {
-    document.querySelectorAll('.mode button').forEach(b => b.classList.toggle('on', b.dataset.mode === state.mode));
-    const nums = $('nums'); nums.innerHTML = '';
-    CARDS.filter(c => c.kind === 'num').forEach(c => nums.appendChild(cardBtn(c)));
-    const mods = $('mods'); mods.innerHTML = '';
-    CARDS.filter(c => c.kind !== 'num').forEach(c => mods.appendChild(cardBtn(c)));
+    if (!state) return;
+    IN_PLAY = inPlayCounts();
+    const mine = me().cards;
+    document.body.classList.toggle('picking', !!ui.pick);
 
-    const table = $('table'); table.innerHTML = '';
-    $('tableCount').textContent = state.table.length ? '(' + state.table.length + ')' : '';
-    if (!state.table.length) table.innerHTML = '<span class="none">Nothing yet — in "Table / Discard" mode, tap cards as they\'re dealt</span>';
-    state.table.forEach((id, i) => {
-      const c = BY_ID[id];
-      const b = document.createElement('button');
-      b.className = 'chip tbl ' + c.kind + (c.special ? ' special' : ''); b.textContent = c.label;
-      b.onclick = () => removeFromTable(i);
-      table.appendChild(b);
+    // Card buttons
+    const nums = $('nums'); nums.innerHTML = '';
+    CARDS.filter(c => c.kind === 'num').forEach(c => nums.appendChild(cardBtn(c, mine)));
+    const mods = $('mods'); mods.innerHTML = '';
+    CARDS.filter(c => c.kind !== 'num').forEach(c => mods.appendChild(cardBtn(c, mine)));
+
+    // Turn bar
+    const t = target();
+    const top = state.forced[state.forced.length - 1];
+    $('who').innerHTML = t == null
+      ? `<span class="sub">${roundOver() ? 'Round over' : 'No one is up'}</span><br><b>Tap “End round”</b>`
+      : `<span class="sub">Next card goes to${top ? ` · ${top.label}: ${top.left} left` : ''}</span><br><b></b>`;
+    if (t != null) $('who').querySelector('b').textContent = pname(t);
+    $('stayBtn').disabled = state.turn == null || !!state.forced.length;
+    $('stayBtn').style.opacity = $('stayBtn').disabled ? .4 : 1;
+
+    // Pick banner
+    $('pickbar').innerHTML = ui.pick ? `<div class="pickbar"><span></span><button>Cancel</button></div>` : '';
+    if (ui.pick) {
+      $('pickbar').querySelector('span').textContent = ui.pick.msg;
+      $('pickbar').querySelector('button').onclick = () => { const pk = ui.pick; ui.pick = null; pk.finish(); commit(); };
+    }
+
+    // Players
+    const box = $('players'); box.innerHTML = '';
+    state.players.forEach((p, i) => {
+      const d = document.createElement('div');
+      const cls = ['player'];
+      if (i === state.me) cls.push('me');
+      if (top && top.target === i) cls.push('target'); else if (!top && state.turn === i) cls.push('turn');
+      if (p.status === 'bust') cls.push('out');
+      d.className = cls.join(' ');
+      const badges = [];
+      if (top && top.target === i) badges.push(`<span class="badge forced">${top.label} · ${top.left}</span>`);
+      else if (!top && state.turn === i) badges.push('<span class="badge now">their turn</span>');
+      if (p.status !== 'active') badges.push(`<span class="badge ${p.status}">${{ stayed: 'stayed', bust: 'BUST', flip7: 'FLIP 7' }[p.status]}</span>`);
+      d.innerHTML = `<button class="phead"><span class="nm"></span>${badges.join('')}<span class="pts">round <b>${roundScore(p)}</b> · total <b>${p.total}</b></span></button><div class="cards"></div>`;
+      d.querySelector('.nm').textContent = pname(i);
+      d.querySelector('.phead').onclick = () => tapPlayer(i);
+      const cards = d.querySelector('.cards');
+      if (!p.cards.length) cards.innerHTML = '<span class="none">No cards</span>';
+      p.cards.forEach((id, j) => {
+        const c = BY_ID[id];
+        const b = document.createElement('button');
+        b.className = 'chip ' + (i === state.me ? '' : 'tbl ') + c.kind + (c.special ? ' special' : '');
+        if (ui.pick && ui.pick.first && ui.pick.first[0] === i && ui.pick.first[1] === j) b.classList.add('pick');
+        b.textContent = c.label;
+        b.onclick = () => tapChip(i, j);
+        cards.appendChild(b);
+      });
+      box.appendChild(d);
     });
 
+    // Discard pile
     const disc = CARDS.filter(c => state.seen[c.id] > 0);
-    const nDisc = disc.reduce((t, c) => t + state.seen[c.id], 0);
-    $('discardCount').textContent = '(' + nDisc + ' cards)';
+    const nDisc = disc.reduce((a, c) => a + state.seen[c.id], 0);
+    const left = CARDS.reduce((a, c) => a + Math.max(0, remaining(c.id)), 0);
+    $('discardCount').textContent = `(${nDisc} cards · ${left} left in deck)`;
     $('discard').innerHTML = nDisc
       ? disc.map(c => `<span class="disc"><b>${c.label}</b> <i>×${state.seen[c.id]}</i></span>`).join('')
       : '<span class="sub">Empty</span>';
 
-    const hand = $('hand'); hand.innerHTML = '';
-    if (!state.hand.length) hand.innerHTML = '<span class="none">Switch to "My Hand" and tap your cards</span>';
-    state.hand.forEach((id, i) => {
-      const c = BY_ID[id];
-      const b = document.createElement('button');
-      b.className = 'chip ' + c.kind + (c.special ? ' special' : ''); b.textContent = c.label;
-      b.onclick = () => removeFromHand(i);
-      hand.appendChild(b);
-    });
-
-    const a = analyze();
+    // Recommendation for me
+    const mp = me();
+    const a = analyze(mine);
+    const myForced = top && top.target === state.me;
     let html;
-    if (a.status === 'bust') {
-      html = banner('bust', 'BUST', '<b>Duplicate number</b>', 'You score 0 this round. Tap “End round”.');
+    if (a.status === 'bust' || mp.status === 'bust') {
+      html = banner('bust', 'BUST', '<b>Duplicate number</b>', 'You score 0 this round.');
     } else if (a.status === 'flip7') {
       html = banner('hit', 'FLIP 7!', `<span>Score <b>${a.score}</b></span>`, '7 number cards — round over, +15 bonus included.');
     } else if (a.status === 'empty') {
       html = banner('idle', '—', '<span>Deck empty</span>', 'Tap “Reshuffle deck”.');
+    } else if (mp.status === 'stayed') {
+      html = banner('idle', 'STAYED', `<span>Score <b>${roundScore(mp)}</b></span>`, `You're out of this round · ${pct(a.pBust)} of the deck would have busted you`);
     } else {
-      const v = a.zero ? 'must' : a.hit ? 'hit' : 'stand';
-      const word = a.zero ? 'MUST HIT' : v.toUpperCase();
+      const v = myForced ? 'must' : a.zero ? 'must' : a.hit ? 'hit' : 'stand';
+      const word = myForced ? 'FORCED' : a.zero ? 'MUST HIT' : v.toUpperCase();
       const stats = `
         <span>Bust <b style="color:${a.pBust > 0.3 ? 'var(--bust)' : 'inherit'}">${pct(a.pBust)}</b></span>
         <span>Now <b>${a.S}</b></span>
         <span>Hit EV <b>${a.evHit.toFixed(1)}</b></span>`;
       const extra = [
+        myForced ? `${top.label}: you must take ${top.left} more · then you'd ${a.hit ? 'hit' : 'stand'}` : '',
         a.zero ? 'holding the 0 — you score 0 unless you Flip 7' : '',
+        state.turn === state.me && !top ? '<b style="color:var(--text)">Your turn</b>' : '',
         `${a.bustCards} of ${a.N} cards left would bust you`,
         a.uniq === 6 ? pct(a.pF7) + ' to Flip 7 next card' : '',
-        `1-card EV ${a.ev1.toFixed(1)}`
       ].filter(Boolean).join(' · ');
       html = banner(v, word, stats, extra);
     }
@@ -419,15 +726,23 @@
   }
 
   let tt;
-  function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 1800); }
+  function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2200); }
 
-  document.querySelectorAll('.mode button').forEach(b => b.onclick = () => { state.mode = b.dataset.mode; commit(); });
+  // ---------- Wire up ----------
+  $('stayBtn').onclick = () => { if (state.turn == null || state.forced.length) return; snapshot(); const i = state.turn; stay(i); commit(); toast(pname(i) + ' stays'); };
+  $('skipBtn').onclick = () => {
+    if (!state) return;
+    snapshot();
+    if (state.forced.length) state.forced.pop(); else advanceTurn();
+    if (state.turn == null && !roundOver()) state.turn = nextActive(state.start - 1 + state.players.length);
+    commit();
+  };
   $('undo').onclick = undo;
   $('endRound').onclick = endRound;
   $('reshuffle').onclick = reshuffle;
-  $('newGame').onclick = newGame;
-  window.__analyze = analyze; window.__depth = d => { DEPTH = d; };
-  render();
+  $('setupBtn').onclick = () => setupSheet(false);
+  window.__state = () => state;
+  if (state) render(); else setupSheet(true);
 })();
 </script>
 </body>
