@@ -138,6 +138,25 @@
   .setup .count button.on { background: var(--accent); }
   .setup .go { width: 100%; margin-top: 8px; padding: 12px; border-radius: 10px; background: var(--hit); color: #052e14; font-weight: 800; }
 
+  /* Camera */
+  .cam { background: var(--panel); border-radius: var(--radius); padding: 8px; margin-bottom: 8px; }
+  .camwrap { position: relative; width: 100%; margin: 0 auto; border-radius: 8px; overflow: hidden; background: #000; }
+  .camwrap video { display: block; width: 100%; height: auto; }
+  .zone { position: absolute; left: 0; right: 0; bottom: 0; border-top: 2px dashed #4f8cffcc; background: #4f8cff1f; pointer-events: none; }
+  .zone span { position: absolute; top: 2px; left: 6px; font-size: 11px; color: #bfd3ff; }
+  .dot { position: absolute; transform: translate(-50%, -50%); background: #000b; color: #fff; font-size: 11px; font-weight: 700; padding: 1px 4px; border-radius: 4px; pointer-events: none; border: 1px solid #fff6; }
+  .dot.new { background: #16a34a; }
+  .cbox { position: absolute; border: 2px solid #22c55e; border-radius: 4px; pointer-events: none; }
+  .cbox.unread { border-style: dashed; border-color: #fbbf24; }
+  .camrow { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+  .camrow .st { flex: 1; font-size: 12.5px; color: var(--muted); }
+  .camrow .st b { color: var(--text); }
+  .camrow button { background: var(--panel2); border-radius: 8px; padding: 7px 10px; font-weight: 600; font-size: 13px; }
+  .livedot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; margin-right: 5px; animation: pulse 1.2s infinite; }
+  .setup select { background: var(--panel2); color: var(--text); border: 1px solid #3a3f4d; border-radius: 8px; padding: 9px 10px; font: inherit; flex: 1; }
+  .setup .lbl { width: 92px; color: var(--muted); font-size: 13px; flex: none; }
+  .setup .note { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
+
   @media (max-width: 420px) {
     .nums { grid-template-columns: repeat(6, 1fr); gap: 4px; }
     .mods { grid-template-columns: repeat(7, 1fr); gap: 4px; }
@@ -153,6 +172,10 @@
 <body>
 
 <div id="rec"></div>
+<div id="cam" class="cam" hidden>
+  <div class="camwrap" id="camwrap"><video id="video" playsinline muted></video><div class="zone" id="zone"><span>your cards below this line</span></div><div id="dots"></div></div>
+  <div class="camrow"><div class="st" id="camStatus">Starting camera…</div><button id="camPause">Pause</button><button id="camSettings">⚙︎</button><button id="camStop">Stop</button></div>
+</div>
 <div id="pickbar"></div>
 
 <div class="turnbar">
@@ -177,6 +200,7 @@
   <button id="endRound" class="primary">End round</button>
   <button id="reshuffle" class="warn">Reshuffle deck</button>
   <button id="setupBtn">Players / new game</button>
+  <button id="camBtn" class="primary" style="grid-column:1/-1">📷 Live camera</button>
 </div>
 
 <details class="info">
@@ -184,12 +208,13 @@
   <p><b>Setup:</b> enter the players in seating (turn) order and pick which one is you.</p>
   <p><b>Dealing:</b> the bar above the cards shows who gets the next card. Tap the card that's dealt and it goes to that player, then the turn moves to the next player still in the round. Tap <b>Stay</b> when the current player stays. If the order goes wrong, tap a player's name → <b>Give them the next card</b>.</p>
   <p><b>Action cards:</b> tap <b>Action</b> when one is dealt and choose what it was:
-  <b>Flip Four</b> / <b>Just One More</b> send the next 4 / 1 cards to the target, then play returns to the normal order.
-  <b>Freeze</b> makes the target stay. <b>Swap</b>, <b>Steal</b> and <b>Discard</b> ask you to tap the cards involved.</p>
+  <b>Flip Four</b> sends the next 4 cards to the target; <b>Just One More</b> sends the next card to the target and then freezes them (they stay). Play then returns to the normal order.
+  <b>Swap</b>, <b>Steal</b> and <b>Discard</b> ask you to tap the cards involved.</p>
   <p><b>Fixing things:</b> tap any card on the table to move it to another player, swap it with another card, discard it, or remove it (if you tapped the wrong card). Undo works for everything.</p>
   <p><b>Special cards</b> are applied automatically: <b>Unlucky 7</b> discards that player's other number and modifier cards; <b>Lucky 13</b> allows a second 13 (a third busts); a duplicate number busts; 7 number cards is a Flip 7 (+15) and ends the round.</p>
   <p><b>End round</b> adds round scores to the totals and moves all cards to the discard pile, which stays out of the deck until you <b>Reshuffle deck</b> (when the draw pile runs out). The next round starts with the next player.</p>
   <p><b>Scoring used:</b> add number cards, apply ÷2 (rounded down), subtract the negatives, never below 0. Holding the <b>0</b> scores 0 unless you Flip 7, and you must keep hitting.</p>
+  <p><b>Live camera:</b> tap <b>📷 Live camera</b>, prop your phone up so it sees the table, and it reads the face-up cards every couple of seconds, right on the phone (nothing is uploaded; the card reader downloads once, about 10 MB). A card is added once it's read the same in two scans in a row. Cards inside the blue zone at the bottom of the picture go to you; other new cards go to whoever's turn it is. It reads the name banner on each card (FOUR, ELEVEN, LUCKY, THE ZERO…), so upside-down and tilted cards are fine; modifiers are recognised as red cards and action cards by their colour, which opens that action straight away. It doesn't read every card every time, so keep an eye on it and tap in anything it misses. It works best with good, even light (glare on the table hides cards), the phone close enough that cards look big, cards not touching each other, and the draw and discard piles out of view. Boxes on the picture show what it found: solid = read, dashed = found but not read yet. Fix any misread by tapping the card.</p>
   <p><b>Recommendation</b> is for you only: the expected score of hitting and then playing perfectly against the exact remaining deck (looking up to 6 cards ahead). It assumes action cards are played on opponents and maximizes this round's score. If you're far behind near 200, lean toward hitting; if you're about to win, lean toward standing.</p>
 </details>
 
@@ -222,7 +247,7 @@
   let ui = { pick: null };
   function blankPlayers(names) { return names.map(name => ({ name, cards: [], status: 'active', total: 0 })); }
   function load() {
-    try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.players && s.players.length) return s; } catch {}
+    try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.players && s.players.length) { s.roundAdded = s.roundAdded || {}; return s; } } catch {}
     return null;
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
@@ -242,6 +267,8 @@
   let IN_PLAY = {};
   const remaining = id => BY_ID[id].total - (state.seen[id] || 0) - (IN_PLAY[id] || 0);
   const addSeen = id => { state.seen[id] = (state.seen[id] || 0) + 1; };
+  // Cards added this round, per type (lets the camera tell new cards from ones already counted)
+  const countAdded = (id, k) => { state.roundAdded[id] = Math.max(0, (state.roundAdded[id] || 0) + k); };
 
   // ---------- Solver ----------
   // State bits: nm = number values held (bits 0..13), T = holding a second 13,
@@ -395,6 +422,7 @@
     if (state.forced.length) {
       const top = state.forced[state.forced.length - 1];
       top.left--;
+      if (top.left <= 0 && top.freeze && isActive(top.target)) state.players[top.target].status = 'stayed'; // Just One More: then frozen
       if (top.left <= 0 || !isActive(top.target)) state.forced.pop();
       // Clear any forced draws whose target is no longer in the round
       while (state.forced.length && !isActive(state.forced[state.forced.length - 1].target)) state.forced.pop();
@@ -422,33 +450,38 @@
     const t = target();
     if (t == null) { toast(roundOver() ? 'Round over — tap “End round”' : 'No one is up — tap a player’s name to give them the card'); return; }
     snapshot();
+    countAdded(id, 1);
     if (BY_ID[id].kind === 'act') { addSeen(id); commit(); actionSheet(t); return; }
     giveCard(t, id);
     cardDone(t);
     commit();
   }
 
-  function actionSheet(actor) {
+  const ACTIONS = {
+    flip4: { label: 'Flip Four', sub: 'target draws the next 4', run: actor => pickPlayer('Flip Four — who must draw 4?', i => forcedDraw(actor, i, 4, 'Flip Four'), actor) },
+    more: { label: 'Just One More', sub: 'target takes 1 card, then freezes', run: actor => pickPlayer('Just One More — who takes one more card?', i => forcedDraw(actor, i, 1, 'Just One More', true), actor) },
+    swap: { label: 'Swap', sub: 'swap two cards on the table', run: actor => startPick('swap', actor) },
+    steal: { label: 'Steal', sub: 'take a card from a player', run: actor => startPick('steal', actor) },
+    discard: { label: 'Discard', sub: 'discard a card from the table', run: actor => startPick('discard', actor) },
+  };
+  // `type` is set when the camera recognised which action card it was
+  function actionSheet(actor, type) {
+    if (type && ACTIONS[type]) { toast(`${pname(actor)} drew ${ACTIONS[type].label}`); ACTIONS[type].run(actor); return; }
     const choose = (fn) => () => { closeSheet(); fn(); };
     const resolveSimple = () => { cardDone(actor); commit(); };
     sheet(`${pname(actor)} drew an action card`, 'What is it?', [
-      ['Flip Four', 'target draws the next 4', choose(() => pickPlayer('Flip Four — who must draw 4?', i => forcedDraw(actor, i, 4, 'Flip Four'), actor))],
-      ['Just One More', 'target takes the next card', choose(() => pickPlayer('Just One More — who takes the next card?', i => forcedDraw(actor, i, 1, 'Just One More'), actor))],
-      ['Freeze', 'target must stay', choose(() => pickPlayer('Freeze — who is frozen?', i => { state.players[i].status = 'stayed'; state.forced = state.forced.filter(x => x.target !== i); cardDone(actor); commit(); }, actor))],
-      ['Swap', 'swap two cards on the table', choose(() => startPick('swap', actor))],
-      ['Steal', `${state.players[actor].name} takes a card`, choose(() => startPick('steal', actor))],
-      ['Discard', 'discard a card from the table', choose(() => startPick('discard', actor))],
-      ['Other / no effect', 'just count it', choose(resolveSimple), 'full'],
+      ...Object.values(ACTIONS).map(x => [x.label, x.sub, choose(() => x.run(actor))]),
+      ['Other / no effect', 'just count it', choose(resolveSimple)],
     ], () => { resolveSimple(); });
   }
 
-  function forcedDraw(actor, tgt, n, label) {
+  function forcedDraw(actor, tgt, n, label, freeze) {
     // The action card itself used up one of the actor's draws (or one of an ongoing forced draw)
     if (state.forced.length) {
       const top = state.forced[state.forced.length - 1];
       top.left--; if (top.left <= 0) state.forced.pop();
     }
-    if (isActive(tgt)) state.forced.push({ target: tgt, left: n, label });
+    if (isActive(tgt)) state.forced.push({ target: tgt, left: n, label, freeze: !!freeze });
     else toast(state.players[tgt].name + ' is not in the round');
     if (!state.forced.length) advanceTurn();
     commit();
@@ -468,7 +501,7 @@
       ...others.map(k => [`Move to ${pname(k)}`, '', () => { closeSheet(); snapshot(); moveCard(i, j, k); commit(); }]),
       ['Swap with…', 'tap another card next', () => { closeSheet(); ui.pick = { type: 'swap', first: [i, j], msg: 'Swap: tap the other card', finish: () => {} }; render(); }],
       ['Discard', 'to the discard pile', () => { closeSheet(); snapshot(); const [c] = state.players[i].cards.splice(j, 1); addSeen(c); refreshStatus(i); commit(); }],
-      ['Remove (mistake)', 'back into the deck', () => { closeSheet(); snapshot(); state.players[i].cards.splice(j, 1); refreshStatus(i); commit(); }, 'full'],
+      ['Remove (mistake)', 'back into the deck', () => { closeSheet(); snapshot(); const [c] = state.players[i].cards.splice(j, 1); countAdded(c, -1); refreshStatus(i); commit(); }, 'full'],
     ]);
   }
 
@@ -535,7 +568,8 @@
     }
     state.round += 1;
     state.start = (state.start + 1) % state.players.length;
-    state.turn = state.start; state.forced = []; ui.pick = null;
+    state.turn = state.start; state.forced = []; ui.pick = null; state.roundAdded = {};
+    if (vision) vision.prev = null;
     const win = state.players.filter(p => p.total >= 200).sort((a, b) => b.total - a.total)[0];
     commit();
     toast(win ? `${win.name} wins with ${win.total}!` : `Round ${state.round} — ${pname(state.turn)} starts`);
@@ -597,7 +631,7 @@
       el.querySelector('.go').onclick = () => {
         if (!first && !confirm('Start a new game? Scores and the deck are reset.')) return;
         const nm = [...el.querySelectorAll('input[type=text]')].map((x, i) => x.value.trim() || 'Player ' + (i + 1));
-        state = { players: blankPlayers(nm), me: meIdx, seen: {}, turn: 0, start: 0, forced: [], round: 1, history: [] };
+        state = { players: blankPlayers(nm), me: meIdx, seen: {}, turn: 0, start: 0, forced: [], round: 1, roundAdded: {}, history: [] };
         ui.pick = null; closeSheet(); commit();
       };
       const c = el.querySelector('.cancel'); if (c) c.onclick = closeSheet;
@@ -727,6 +761,636 @@
 
   let tt;
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2200); }
+
+
+  // ---------- Live camera (on-device card recognition) ----------
+  // 1. Find light, card-shaped regions in a small copy of the frame.
+  // 2. Read the big number on each card with Tesseract OCR (runs in the browser, no server).
+  // 3. A card is added once two scans in a row agree and it isn't already counted this round.
+  const CAM_KEY = 'flip7vengeance.cam3';
+  const CAM_DEFAULTS = { every: 2, zone: true, zoneY: 0.65, vMin: 0.42, delta: 0.36 };
+  const camCfg = (() => { try { return Object.assign({}, CAM_DEFAULTS, JSON.parse(localStorage.getItem(CAM_KEY)) || {}); } catch { return Object.assign({}, CAM_DEFAULTS); } })();
+  const saveCam = () => { try { localStorage.setItem(CAM_KEY, JSON.stringify(camCfg)); } catch {} };
+  const VISION_IDS = { unlucky7: 'u7', lucky13: 'l13', '-2': 'm2', '-4': 'm4', '-6': 'm6', '-8': 'm8', '-10': 'm10', div2: 'd2', action: 'act' };
+  for (let n = 0; n <= 13; n++) VISION_IDS[String(n)] = 'n' + n;
+
+  // --- OCR engine (Tesseract.js, bundled in vendor/tesseract) ---
+  const OCR = { worker: null, loading: null, mode: '' };
+  const vendor = p => new URL('vendor/tesseract/' + p, location.href).href;
+  function loadScript(src) {
+    return new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = () => rej(new Error('Could not load ' + src)); document.head.appendChild(el); });
+  }
+  function ensureOCR() {
+    if (OCR.worker) return Promise.resolve(OCR.worker);
+    if (!OCR.loading) OCR.loading = (async () => {
+      if (!window.Tesseract) await loadScript(vendor('tesseract.min.js'));
+      const w = await Tesseract.createWorker('eng', 1, { workerPath: vendor('worker.min.js'), corePath: vendor(''), langPath: vendor(''), gzip: true });
+      OCR.worker = w; return w;
+    })().catch(e => { OCR.loading = null; throw e; });
+    return OCR.loading;
+  }
+  // --- Card finding ---
+  // Number cards are light and cooler (bluer) than a wooden table; modifier cards are red.
+  // We judge "cool" relative to the table's own colour (the median of the frame), so it adapts to lighting.
+  const warmth = (r, g, b, mx) => mx ? (r - b) / mx : 0;
+  const redness = (r, g, b, mx) => mx ? (r - Math.max(g, b)) / mx : 0;
+  // Connected regions with their size, centre and orientation (principal axis), so tilted cards work
+  function components(mask, W, H, onRegion) {
+    const lab = new Int32Array(W * H), stack = [], members = [];
+    let id = 0;
+    for (let k = 0; k < mask.length; k++) {
+      if (!mask[k] || lab[k]) continue;
+      id++; members.length = 0;
+      let x0 = W, y0 = H, x1 = 0, y1 = 0, sx = 0, sy = 0;
+      stack.push(k); lab[k] = id;
+      while (stack.length) {
+        const q = stack.pop(), x = q % W, y = (q / W) | 0; members.push(q); sx += x; sy += y;
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+        if (x > 0 && mask[q - 1] && !lab[q - 1]) { lab[q - 1] = id; stack.push(q - 1); }
+        if (x < W - 1 && mask[q + 1] && !lab[q + 1]) { lab[q + 1] = id; stack.push(q + 1); }
+        if (y > 0 && mask[q - W] && !lab[q - W]) { lab[q - W] = id; stack.push(q - W); }
+        if (y < H - 1 && mask[q + W] && !lab[q + W]) { lab[q + W] = id; stack.push(q + W); }
+      }
+      const n = members.length, bw = x1 - x0 + 1, bh = y1 - y0 + 1;
+      if (n < 0.0012 * W * H || bw * bh > 0.3 * W * H || Math.min(bw, bh) < 8) continue;
+      // Minimum-area rectangle around the region (rotating calipers on its convex hull)
+      const pts = [];
+      for (const q of members) {
+        const x = q % W, y = (q / W) | 0;
+        if (x === 0 || y === 0 || x === W - 1 || y === H - 1 || lab[q - 1] !== id || lab[q + 1] !== id || lab[q - W] !== id || lab[q + W] !== id) pts.push([x, y]);
+      }
+      const hull = convexHull(pts);
+      let best = null;
+      for (let i = 0; i < hull.length; i++) {
+        const [px, py] = hull[i], [qx, qy] = hull[(i + 1) % hull.length];
+        const len = Math.hypot(qx - px, qy - py); if (!len) continue;
+        const ux = (qx - px) / len, uy = (qy - py) / len;
+        let a0 = 1e9, a1 = -1e9, b0 = 1e9, b1 = -1e9;
+        for (const [x, y] of hull) { const a = x * ux + y * uy, bb = -x * uy + y * ux; if (a < a0) a0 = a; if (a > a1) a1 = a; if (bb < b0) b0 = bb; if (bb > b1) b1 = bb; }
+        const area = (a1 - a0) * (b1 - b0);
+        if (!best || area < best.area) best = { area, ux, uy, a0, a1, b0, b1 };
+      }
+      if (!best) continue;
+      let { ux, uy, a0, a1, b0, b1 } = best;
+      let L = a1 - a0 + 1, S = b1 - b0 + 1, th = Math.atan2(uy, ux);
+      const ma = (a0 + a1) / 2, mb = (b0 + b1) / 2;
+      const ccx = ma * ux - mb * uy, ccy = ma * uy + mb * ux;
+      if (S > L) { [L, S] = [S, L]; th += Math.PI / 2; }
+      if (n / (L * S) < 0.5) continue;           // not rectangle-like
+      onRegion({ cx: ccx, cy: ccy, th, L, S, x: x0, y: y0, w: bw, h: bh });
+    }
+  }
+  function convexHull(p) {
+    if (p.length < 3) return p.slice();
+    p.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lo = [], up = [];
+    for (const q of p) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); }
+    for (let i = p.length - 1; i >= 0; i--) { const q = p[i]; while (up.length >= 2 && cross(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
+    return lo.slice(0, -1).concat(up.slice(0, -1));
+  }
+  function dilate(m, W, H) {
+    const d = new Uint8Array(W * H);
+    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+      const k = y * W + x;
+      d[k] = m[k] | m[k - 1] | m[k + 1] | m[k - W] | m[k + W];
+    }
+    return d;
+  }
+  function findCardBoxes(frame) {
+    const W = 400, H = Math.round(frame.height * W / frame.width);
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(frame, 0, 0, W, H);
+    const px = g.getImageData(0, 0, W, H).data;
+    // Table colour = median warmth of the frame
+    const hist = new Uint32Array(201);
+    for (let i = 0; i < px.length; i += 4) {
+      const mx = Math.max(px[i], px[i + 1], px[i + 2]);
+      hist[Math.max(0, Math.min(200, Math.round((warmth(px[i], px[i + 1], px[i + 2], mx) + 1) * 100)))]++;
+    }
+    let acc = 0, med = 0; const half = W * H / 2;
+    for (let k = 0; k < 201; k++) { acc += hist[k]; if (acc >= half) { med = k / 100 - 1; break; } }
+    const coolMax = med - camCfg.delta;
+    // Table hue / saturation (median), so coloured cards are judged against the table's own colour
+    const hueOf = (r, g, b, mx, mn) => { if (mx === mn) return 0; const h = mx === r ? ((g - b) / (mx - mn)) % 6 : mx === g ? (b - r) / (mx - mn) + 2 : (r - g) / (mx - mn) + 4; return (h * 60 + 360) % 360; };
+    const hs = [], ss = [];
+    for (let i = 0; i < px.length; i += 40) { const mx = Math.max(px[i], px[i + 1], px[i + 2]), mn = Math.min(px[i], px[i + 1], px[i + 2]); hs.push(hueOf(px[i], px[i + 1], px[i + 2], mx, mn)); ss.push(mx ? (mx - mn) / mx : 0); }
+    hs.sort((a, b) => a - b); ss.sort((a, b) => a - b);
+    const tHue = hs[hs.length >> 1], tSat = ss[ss.length >> 1];
+    const white = new Uint8Array(W * H), red = new Uint8Array(W * H);
+    for (let i = 0, j = 0; j < white.length; i += 4, j++) {
+      const r = px[i], gg = px[i + 1], b = px[i + 2], mx = Math.max(r, gg, b);
+      if (mx >= camCfg.vMin * 255 && warmth(r, gg, b, mx) <= coolMax) white[j] = 1;
+      else if (mx >= 90) {   // strongly coloured, and a different colour from the table: modifier (red) or action card
+        const mn = Math.min(r, gg, b), sat = (mx - mn) / mx, hd = Math.abs(((hueOf(r, gg, b, mx, mn) - tHue + 540) % 360) - 180);
+        if ((sat >= 0.38 && hd > 20) || sat >= tSat + 0.32) red[j] = 1;
+      }
+    }
+    const k = frame.width / W, boxes = [];
+    const add = kind => r => boxes.push({ kind, cx: r.cx * k, cy: r.cy * k, th: r.th, L: r.L * k, S: r.S * k, x: r.x * k, y: r.y * k, w: r.w * k, h: r.h * k });
+    components(dilate(white, W, H), W, H, add('white'));
+    components(dilate(red, W, H), W, H, add('color'));
+    // Drop regions far bigger or smaller than a typical card (the median light card, when there are some)
+    const ls = boxes.filter(b => b.kind === 'white' && b.L / b.S > 1.15 && b.L / b.S < 1.75).map(b => b.L).sort((a, b) => a - b);
+    if (ls.length >= 2) {
+      const typ = ls[ls.length >> 1];
+      return boxes.filter(b => b.kind === 'white' ? b.S < typ * 1.6 && b.L > typ * 0.5 : b.L < typ * 1.5 && b.L > typ * 0.6);
+    }
+    return boxes;
+  }
+
+  const NAMES = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'TEN', 'ELEVEN', 'TWELVE', 'THIRTEEN'];
+  function editDist(a, b) {
+    const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++)
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    return d[a.length][b.length];
+  }
+  // Banner word -> card. Returns { v, strong } (v: 0-13, or 'u7' / 'l13'), or null.
+  // strong = a whole name (one misread letter allowed); weak = only a fragment was readable.
+  function nameValue(word) {
+    const w = word.toUpperCase().replace(/[^A-Z]/g, '');
+    if (w.length < 3) return null;
+    if (/UNLUC|NLUCK/.test(w)) return { v: 'u7', strong: true };
+    if (/LUCKY|LUCK|UCKY/.test(w)) return { v: 'l13', strong: true };
+    if (/ZERO|ZER|THEZ/.test(w)) return { v: 0, strong: true };
+    const d = NAMES.map(n => editDist(w, n)), bd = Math.min(...d), ties = d.map((e, v) => e === bd ? v : -1).filter(v => v >= 0);
+    if (bd === 0) return { v: ties[0], strong: true, exact: true };
+    if (bd <= (w.length >= 6 ? 2 : 1)) {
+      // one misread letter; a 3-letter word that's off by one is only a weak hint. Ties ("LEVEN": SEVEN/ELEVEN) keep all options.
+      return { v: ties[0], alts: ties, strong: w.length >= 4 };
+    }
+    // a clean fragment of exactly one name ("ELVE" from TWELVE)
+    if (w.length >= 4) { const hits = NAMES.map((n, v) => n.includes(w) ? v : -1).filter(v => v >= 0); if (hits.length === 1) return { v: hits[0], strong: false }; }
+    // every name has its own first three letters (THI, TWE, ELE, SIX, SEV ...)
+    const hits = NAMES.map((n, v) => n.startsWith(w.slice(0, 3)) ? v : -1).filter(v => v >= 0);
+    if (hits.length === 1) return { v: hits[0], strong: false };
+    return null;
+  }
+
+  // --- Reading one card ---
+  // Card layout (number cards): a big number in the middle and its name ("FOUR") on a banner below it.
+  // We cut the card out upright, find the ink, work out which way up it is from where the banner is,
+  // then read the big number (digits only) and the banner (letters only) separately.
+
+  // Cut a card out of the frame so it stands upright: centre (cx, cy), long axis at angle th,
+  // size L (long) x S (short). `flip` adds 180°. Output is `scale` times bigger.
+  function cutOut(frame, card, flip, scale) {
+    const RW = Math.round(card.S * scale), RH = Math.round(card.L * scale);
+    const c = document.createElement('canvas'); c.width = RW; c.height = RH;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.imageSmoothingQuality = 'high';
+    const rot = Math.PI / 2 - card.th + (flip ? Math.PI : 0); // turn the long axis to vertical
+    g.translate(RW / 2, RH / 2); g.rotate(rot); g.scale(scale, scale); g.translate(-card.cx, -card.cy);
+    g.drawImage(frame, 0, 0);
+    const toFrame = (x, y) => {
+      const dx = (x - RW / 2) / scale, dy = (y - RH / 2) / scale, a = -rot;
+      return [(card.cx + dx * Math.cos(a) - dy * Math.sin(a)) / frame.width, (card.cy + dx * Math.sin(a) + dy * Math.cos(a)) / frame.height];
+    };
+    return { c, g, W: RW, H: RH, toFrame };
+  }
+
+  // Ink mask: pixels clearly different in colour from the card's own background
+  function inkMask(g, W, H, red) {
+    const p = g.getImageData(0, 0, W, H).data;
+    const rs = [], gs = [], bs = [];
+    for (let i = 0; i < p.length; i += 28) { rs.push(p[i]); gs.push(p[i + 1]); bs.push(p[i + 2]); }
+    const med = a => a.sort((x, y) => x - y)[a.length >> 1];
+    const R = med(rs), G = med(gs), B = med(bs);
+    inkMask.bgSat = Math.max(R, G, B) ? (Math.max(R, G, B) - Math.min(R, G, B)) / Math.max(R, G, B) : 0;
+    const ink = new Uint8Array(W * H);
+    for (let i = 0, j = 0; j < ink.length; i += 4, j++) {
+      const r = p[i], gg = p[i + 1], bb = p[i + 2];
+      if (red) { const mx = Math.max(r, gg, bb); ink[j] = redness(r, gg, bb, mx) < 0.15 && mx > 110 ? 1 : 0; }
+      else ink[j] = Math.hypot(r - R, gg - G, bb - B) > 56 ? 1 : 0;
+    }
+    return ink;
+  }
+
+  // Connected ink blobs, ignoring ones that touch the edge (the table) or are frame-shaped
+  function blobs(ink, W, H) {
+    const lab = new Int32Array(W * H), stack = [], out = [];
+    let id = 0;
+    for (let k = 0; k < ink.length; k++) {
+      if (!ink[k] || lab[k]) continue;
+      id++; let n = 0, x0 = W, y0 = H, x1 = 0, y1 = 0;
+      stack.push(k); lab[k] = id;
+      while (stack.length) {
+        const q = stack.pop(), x = q % W, y = (q / W) | 0; n++;
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+        if (x > 0 && ink[q - 1] && !lab[q - 1]) { lab[q - 1] = id; stack.push(q - 1); }
+        if (x < W - 1 && ink[q + 1] && !lab[q + 1]) { lab[q + 1] = id; stack.push(q + 1); }
+        if (y > 0 && ink[q - W] && !lab[q - W]) { lab[q - W] = id; stack.push(q - W); }
+        if (y < H - 1 && ink[q + W] && !lab[q + W]) { lab[q + W] = id; stack.push(q + W); }
+      }
+      if (n < 8) continue;
+      const edge = x0 <= 1 || y0 <= 1 || x1 >= W - 2 || y1 >= H - 2;
+      const frameLike = (x1 - x0) > 0.6 * W && (y1 - y0) > 0.6 * H;
+      out.push({ id, x0, y0, x1, y1, n, w: x1 - x0 + 1, h: y1 - y0 + 1, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, drop: edge || frameLike });
+    }
+    return { lab, list: out };
+  }
+
+  // Draw only the chosen blobs, black on white, cropped to `box`, padded and scaled so text is `textH` px tall
+  function morph(m, W, H, r, grow) {
+    // separable square dilation (grow=1) or erosion (grow=0)
+    const t = new Uint8Array(W * H), o = new Uint8Array(W * H);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      let v = grow ? 0 : 1;
+      for (let d = -r; d <= r; d++) { const xx = x + d; const p = xx < 0 || xx >= W ? (grow ? 0 : 1) : m[y * W + xx]; if (grow ? p : !p) { v = grow ? 1 : 0; break; } }
+      t[y * W + x] = v;
+    }
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      let v = grow ? 0 : 1;
+      for (let d = -r; d <= r; d++) { const yy = y + d; const p = yy < 0 || yy >= H ? (grow ? 0 : 1) : t[yy * W + x]; if (grow ? p : !p) { v = grow ? 1 : 0; break; } }
+      o[y * W + x] = v;
+    }
+    return o;
+  }
+  function blobImage(lab, W, keep, box, textH, close = 0) {
+    const ids = new Set(keep.map(k => k.id));
+    const s = Math.max(0.5, Math.min(6, textH / box.h));
+    const P = 16, cw = Math.round(box.w * s) + 2 * P, ch = Math.round(box.h * s) + 2 * P;
+    const src = document.createElement('canvas'); src.width = box.w; src.height = box.h;
+    const sg = src.getContext('2d'); const im = sg.createImageData(box.w, box.h);
+    let m = new Uint8Array(box.w * box.h);
+    for (let y = 0; y < box.h; y++) for (let x = 0; x < box.w; x++) m[y * box.w + x] = ids.has(lab[(box.y + y) * W + box.x + x]) ? 1 : 0;
+    // Close small gaps (outlined digits have a thin pale fill between two lines) so glyphs become solid
+    if (close) m = morph(morph(m, box.w, box.h, close, 1), box.w, box.h, close, 0);
+    for (let k = 0; k < m.length; k++) { const v = m[k] ? 0 : 255, o = k * 4; im.data[o] = im.data[o + 1] = im.data[o + 2] = v; im.data[o + 3] = 255; }
+    sg.putImageData(im, 0, 0);
+    const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cw, ch);
+    g.imageSmoothingEnabled = true; g.drawImage(src, P, P, cw - 2 * P, ch - 2 * P);
+    return c;
+  }
+  const unionBox = (list, W, H, m = 3) => {
+    if (!list.length) return { x: 0, y: 0, w: W, h: H, x0: 0, y0: 0, x1: W - 1, y1: H - 1 };
+    const x0 = Math.max(0, Math.min(...list.map(b => b.x0)) - m), y0 = Math.max(0, Math.min(...list.map(b => b.y0)) - m);
+    const x1 = Math.min(W - 1, Math.max(...list.map(b => b.x1)) + m), y1 = Math.min(H - 1, Math.max(...list.map(b => b.y1)) + m);
+    return { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1, x0, y0, x1, y1 };
+  };
+
+  async function ocrLine(canvas, whitelist) {
+    const w = await ensureOCR();
+    const key = whitelist;
+    if (OCR.mode !== key) { await w.setParameters({ tessedit_char_whitelist: whitelist, tessedit_pageseg_mode: '7' }); OCR.mode = key; }
+    const { data } = await w.recognize(canvas);
+    return { text: (data.text || '').replace(/\s+/g, ''), conf: data.confidence || 0 };
+  }
+
+  // Make a text strip black-on-white: split dark/light with Otsu's threshold, then drop
+  // blobs that touch the strip's edge or are long lines (the banner's border), keeping letter-sized blobs.
+  function cleanText(g, W, H, pad) {
+    const im = g.getImageData(0, 0, W, H), p = im.data;
+    const gray = new Uint8Array(W * H), hist = new Float64Array(256);
+    for (let i = 0, j = 0; j < gray.length; i += 4, j++) {
+      const v = (p[i] * 0.3 + p[i + 1] * 0.59 + p[i + 2] * 0.11) | 0; gray[j] = v;
+      const x = j % W, y = (j / W) | 0;
+      if (x >= pad && y >= pad && x < W - pad && y < H - pad) hist[v]++;
+    }
+    let tot = 0, sum = 0; for (let v = 0; v < 256; v++) { tot += hist[v]; sum += v * hist[v]; }
+    let wB = 0, sB = 0, best = 0, thr = 128;
+    for (let v = 0; v < 256; v++) {
+      wB += hist[v]; if (!wB) continue; const wF = tot - wB; if (!wF) break;
+      sB += v * hist[v]; const mB = sB / wB, mF = (sum - sB) / wF, between = wB * wF * (mB - mF) ** 2;
+      if (between > best) { best = between; thr = v; }
+    }
+    const ink = new Uint8Array(W * H);
+    for (let j = 0; j < ink.length; j++) { const x = j % W, y = (j / W) | 0; ink[j] = gray[j] <= thr && x >= pad && y >= pad && x < W - pad && y < H - pad ? 1 : 0; }
+    const { list, lab } = blobs(ink, W, H);
+    const keep = new Set(list.filter(k => {
+      const touches = k.x0 <= pad + 1 || k.y0 <= pad + 1 || k.x1 >= W - pad - 2 || k.y1 >= H - pad - 2;
+      return !touches && k.w < 0.4 * (W - 2 * pad) && k.h > 0.2 * (H - 2 * pad);
+    }).map(k => k.id));
+    for (let j = 0, i = 0; j < ink.length; j++, i += 4) { const v = keep.has(lab[j]) ? 0 : 255; p[i] = p[i + 1] = p[i + 2] = v; }
+    g.putImageData(im, 0, 0);
+  }
+
+  // Read one upright candidate (the card might still be upside down: the caller tries both ways)
+  async function readUpright(cut, red) {
+    const { W, H } = cut;
+    const ink = inkMask(cut.g, W, H, red);
+    const bgSat = inkMask.bgSat;
+    const { lab, list } = blobs(ink, W, H);
+    let digits = list.filter(k => !k.drop && k.h >= 0.18 * H && k.h <= 0.7 * H && k.cx > 0.2 * W && k.cx < 0.8 * W && k.w < 0.55 * W && k.cy < 0.75 * H);
+    if (!digits.length) return null;
+    const maxH = Math.max(...digits.map(k => k.h));
+    digits = digits.filter(k => k.h >= 0.6 * maxH);
+    const dBox = unionBox(digits, W, H);
+    // ÷2 card: two small dots stacked left of the 2
+    const div = red && list.filter(k => !k.drop && k.h < 0.08 * H && k.w < 0.12 * W && k.x1 < dBox.x0 + 2 && k.cy > dBox.y0 - 0.1 * H && k.cy < dBox.y1 + 0.1 * H && k.h / k.w > 0.5 && k.h / k.w < 2).length >= 2;
+    const num = await ocrLine(blobImage(lab, W, digits, dBox, 90, Math.max(1, Math.round(H * 0.007))), '0123456789-');
+    let name = null, word = '';
+    if (!red) {
+      // the name banner sits below the number
+      const y0 = Math.max(dBox.y1 + 2, H * 0.66), y1 = Math.min(H * 0.94, y0 + H * 0.17);
+      if (y1 - y0 > 4) {
+        const bw = Math.round(W * 0.72), bh = Math.round(y1 - y0), s2 = Math.min(5, 105 / bh);
+        const c = document.createElement('canvas'); c.width = Math.round(bw * s2) + 24; c.height = Math.round(bh * s2) + 24;
+        const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+        g.imageSmoothingQuality = 'high';
+        g.drawImage(cut.c, W * 0.14, y0, bw, bh, 12, 12, c.width - 24, c.height - 24);
+        cleanText(g, c.width, c.height, 12);
+        const wt = await ocrLine(c, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+        word = wt.text; name = nameValue(word);
+      }
+    }
+    const m = num.text.match(/^(-?)(\d{1,2})$/);
+    const dv = m && +m[2] <= 13 ? +m[2] : -1;
+    const [x, y] = cut.toFrame(dBox.x + dBox.w / 2, dBox.y + dBox.h / 2);
+    return { dv, name, word, conf: num.conf, x, y, div, bgSat };
+  }
+
+  // Read one card (tries it both ways up; the spelled-out name, which only reads the right way up, decides)
+  async function readCard(frame, card, red) {
+    const scale = Math.max(1, Math.min(5, 280 / card.L));
+    const a = await readUpright(cutOut(frame, card, false, scale), red);
+    const b = await readUpright(cutOut(frame, card, true, scale), red);
+    const opts = [a, b].filter(Boolean);
+    let best = null, v = -1;
+    // 1) a whole name read on the banner (only reads correctly the right way up)
+    // a near-miss name (or a tie between names) must not contradict confidently read digits
+    const fits = (v, dv) => String(v).includes(String(dv)) || (v === 'u7' && dv === 7) || (v === 'l13' && dv === 13);
+    for (const o of opts) {
+      if (!o.name || o.name.exact) continue;
+      const alts = o.name.alts || [o.name.v];
+      if (o.dv >= 0) {
+        const ok = alts.filter(v => fits(v, o.dv));
+        if (ok.length === 1) o.name.v = ok[0];
+        else if (o.conf >= 50 || ok.length > 1) { o.name = null; o.conflict = true; }
+      } else if (alts.length > 1) { o.name = null; o.conflict = true; }
+    }
+    if (opts.some(o => o.conflict)) return null;   // banner and digits disagree: don't guess
+    const strong = opts.filter(o => o.name && o.name.strong);
+    // 2) a fragment of a name, accepted only if the big digits agree with it (or no digits were read)
+    const agrees = o => o.dv < 0 || String(o.name.v).includes(String(o.dv)) || (o.name.v === 'u7' && o.dv === 7) || (o.name.v === 'l13' && o.dv === 13);
+    const weak = opts.filter(o => o.name && !o.name.strong && agrees(o) && (o.dv >= 0 || o.word.length >= 4));
+    const pick = strong.length ? strong : weak;
+    if (pick.length) { best = pick.sort((p, q) => q.conf - p.conf)[0]; v = best.name.v; }
+    else if (a && b && a.word.length !== b.word.length && Math.max(a.word.length, b.word.length) >= 3) {
+      // Couldn't read the name, but letters showed up on the banner only one way up: that way is upright
+      const up = a.word.length > b.word.length ? a : b;
+      if (up.name) return null;                       // the banner fragment contradicts the digits: don't guess
+      if (up.dv >= 0 && up.dv !== 1 && up.conf >= 60 && up.bgSat < 0.22 && card.L / card.S > 1.2 && card.L / card.S < 1.75) { best = up; v = up.dv; }
+    }
+    const cardShaped = card.L / card.S > 1.2 && card.L / card.S < 1.75;
+    if (!best && cardShaped) {
+      // digits alone are only trusted on a pale number-card background (not card backs or other printed things)
+      const withDigits = opts.filter(o => o.dv >= 0 && o.dv !== 1 && o.conf >= 70 && (red || o.bgSat < 0.22)).sort((p, q) => q.conf - p.conf);
+      if (withDigits.length) { best = withDigits[0]; v = best.dv; }
+      // 6 and 9 look the same upside down: without a readable name we can't tell them apart
+      if (best && (v === 6 || v === 9)) return null;
+    }
+    if (!best || v === -1) return null;
+    let id;
+    if (red) {
+      if (best.div && v === 2) id = 'div2';
+      else if ([2, 4, 6, 8, 10].includes(v)) id = '-' + v;
+      else return null;
+    } else id = v === 'u7' ? 'unlucky7' : v === 'l13' ? 'lucky13' : String(v);
+    return { card: id, x: best.x, y: best.y };
+  }
+
+  // Read all cards in one region. A long region of light cards is a row of cards touching each other.
+  // Action cards have their own background colours; modifiers are red
+  const ACTION_HUES = [[15, 45, 'steal'], [45, 72, 'flip4'], [72, 170, 'swap'], [170, 255, 'more'], [255, 335, 'discard']];
+  function regionHue(frame, b) {
+    const cut = cutOut(frame, b, false, Math.min(1, 80 / b.L));
+    const p = cut.g.getImageData(0, 0, cut.W, cut.H).data, hues = [];
+    for (let i = 0; i < p.length; i += 8) {
+      const r = p[i], g = p[i + 1], bb = p[i + 2], mx = Math.max(r, g, bb), mn = Math.min(r, g, bb);
+      if (!mx || (mx - mn) / mx < 0.35) continue;
+      let h = mx === r ? ((g - bb) / (mx - mn)) % 6 : mx === g ? (bb - r) / (mx - mn) + 2 : (r - g) / (mx - mn) + 4;
+      hues.push((h * 60 + 360) % 360);
+    }
+    if (hues.length < 20) return -1;
+    hues.sort((x, y) => x - y);
+    return hues[hues.length >> 1];
+  }
+  async function readRegion(frame, b) {
+    let red = false;
+    if (b.kind === 'color') {
+      const ratio = b.L / b.S;
+      if (ratio < 1.15 || ratio > 1.75) return [];            // not card-shaped
+      const hue = regionHue(frame, b);
+      if (hue < 0) return [];
+      if (hue >= 335 || hue < 15) red = true;
+      else {
+        const t = ACTION_HUES.find(([lo, hi]) => hue >= lo && hue < hi);
+        return t ? [{ card: 'action', action: t[2], x: b.cx / frame.width, y: b.cy / frame.height }] : [];
+      }
+    }
+    const ratio = b.L / b.S;
+    if (!red && ratio > 1.9) {
+      const n = Math.max(2, Math.round(ratio / 0.72)), seg = b.L / n, out = [];
+      const ux = Math.cos(b.th), uy = Math.sin(b.th);
+      for (let i = 0; i < n; i++) {
+        const off = -b.L / 2 + seg * (i + 0.5);
+        // each card in the row stands across the row direction
+        const r = await readCard(frame, { cx: b.cx + off * ux, cy: b.cy + off * uy, th: b.th + Math.PI / 2, L: b.S, S: seg }, false);
+        if (r) out.push(r);
+      }
+      return out;
+    }
+    const r = await readCard(frame, b, red);
+    return r ? [r] : [];
+  }
+
+  const iou = (a, b) => {
+    const ix = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
+    const iy = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+    const i = ix * iy; return i / (a.w * a.h + b.w * b.h - i);
+  };
+
+  // One scan: find regions, reuse readings for regions that haven't moved, OCR the rest
+  async function scanFrame(frame) {
+    const boxes = findCardBoxes(frame);
+    const prev = vision.regions || [];
+    const regions = [];
+    for (const b of boxes) {
+      const old = prev.find(r => iou(r.box, b) > 0.8);
+      regions.push({ box: b, cards: old ? old.cards : await readRegion(frame, b) });
+      if (!vision) return null;
+    }
+    vision.regions = regions;
+    return regions;
+  }
+
+  let vision = null; // { stream, timer, busy, paused, prev, regions, lock }
+  const sheetOpen = () => !!document.getElementById('sheet').innerHTML;
+
+  async function startCamera() {
+    if (vision) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('This browser can’t use the camera'); return; }
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 } }, audio: false });
+    } catch (e) { toast('Camera blocked: ' + (e.message || e.name)); return; }
+    vision = { stream, timer: null, busy: false, paused: false, prev: null, regions: [], lock: null };
+    const v = $('video'); v.srcObject = stream; await v.play().catch(() => {});
+    $('cam').hidden = false; $('camBtn').textContent = '📷 Camera on (tap to stop)';
+    const fit = () => { if (v.videoWidth) $('camwrap').style.maxWidth = `calc(34vh * ${v.videoWidth / v.videoHeight})`; };
+    v.onloadedmetadata = fit; fit();
+    layoutZone();
+    try { vision.lock = await navigator.wakeLock.request('screen'); } catch {}
+    if (!OCR.worker) setCamStatus('Loading the card reader (first time ~10 MB)…');
+    try { await ensureOCR(); } catch (e) { setCamStatus('⚠︎ ' + e.message); return; }
+    setCamStatus('Watching the table…');
+    tick();
+  }
+  function stopCamera() {
+    if (!vision) return;
+    clearTimeout(vision.timer);
+    vision.stream.getTracks().forEach(t => t.stop());
+    try { vision.lock && vision.lock.release(); } catch {}
+    vision = null;
+    $('video').srcObject = null; $('cam').hidden = true; $('dots').innerHTML = '';
+    $('camBtn').textContent = '📷 Live camera';
+  }
+  function layoutZone() {
+    $('zone').style.display = camCfg.zone ? '' : 'none';
+    $('zone').style.top = (camCfg.zoneY * 100) + '%';
+  }
+  function setCamStatus(html) { $('camStatus').innerHTML = (vision && !vision.paused ? '<span class="livedot"></span>' : '') + html; }
+
+  function grabFrame() {
+    const v = $('video');
+    if (!v.videoWidth) return null;
+    const c = document.createElement('canvas');
+    c.width = v.videoWidth; c.height = v.videoHeight;
+    c.getContext('2d').drawImage(v, 0, 0);
+    return c;
+  }
+
+  async function tick() {
+    if (!vision) return;
+    const v = vision;
+    if (!v.busy && !v.paused && !sheetOpen() && !ui.pick && state && !roundOver()) {
+      v.busy = true;
+      const t0 = performance.now();
+      try {
+        const frame = grabFrame();
+        if (frame) {
+          const regions = await scanFrame(frame);
+          if (vision !== v || !regions) return;
+          const cards = regions.flatMap(r => r.cards);
+          const added = onDetections(cards, regions, frame);
+          setCamStatus(`<b>${cards.length}</b> cards read · ${added ? `<b>${added} new</b>` : 'nothing new'} · ${((performance.now() - t0) / 1000).toFixed(1)}s`);
+        }
+      } catch (e) { setCamStatus('⚠︎ ' + (e.message || e)); }
+      v.busy = false;
+    } else if (v.paused) setCamStatus('Paused');
+    v.timer = setTimeout(tick, camCfg.every * 1000);
+  }
+
+  // Compare two consecutive scans and add cards that are confirmed in both but not yet counted this round
+  function onDetections(list, regions, frame) {
+    const counts = {}, mine = {};
+    const dots = [];
+    for (const d of list) {
+      const id = VISION_IDS[d.card]; if (!id) continue;
+      counts[id] = (counts[id] || 0) + 1;
+      const inZone = camCfg.zone && d.y >= camCfg.zoneY;
+      if (inZone) mine[id] = (mine[id] || 0) + 1;
+      dots.push({ id, x: d.x, y: d.y });
+      if (d.action) vision.lastAction = d.action;
+    }
+    const prev = vision.prev;
+    vision.prev = { counts, mine };
+    const queue = [];
+    if (prev) {
+      IN_PLAY = inPlayCounts();
+      for (const id of Object.keys(counts)) {
+        const conf = Math.min(counts[id], prev.counts[id] || 0);
+        const n = Math.min(conf - (state.roundAdded[id] || 0), Math.max(0, remaining(id)));
+        if (n <= 0) continue;
+        const myHave = me().cards.filter(x => x === id).length;
+        const myNew = camCfg.zone ? Math.max(0, Math.min(mine[id] || 0, prev.mine[id] || 0) - myHave) : 0;
+        for (let k = 0; k < n; k++) queue.push({ id, toMe: k < myNew });
+      }
+    }
+    // numbers & modifiers first, then at most one action card (it opens a question)
+    queue.sort((a, b) => (a.id === 'act') - (b.id === 'act'));
+    let added = 0, action = null;
+    if (queue.length) {
+      snapshot();
+      for (const q of queue) {
+        if (roundOver()) break;
+        countAdded(q.id, 1); added++;
+        if (q.id === 'act') { addSeen('act'); if (action == null) action = target(); else toast('Several action cards seen — resolve the others by hand'); continue; }
+        liveGive(q.id, q.toMe);
+      }
+      commit();
+      toast('📷 Added: ' + queue.map(q => BY_ID[q.id].label).join(' '));
+      if (action != null) actionSheet(action, vision.lastAction);
+    }
+    // Show the regions found and what was read in each
+    const newIds = queue.map(q => q.id);
+    const fw = frame ? frame.width : 1, fh = frame ? frame.height : 1;
+    $('dots').innerHTML = (regions || []).map(r => `<span class="cbox${r.cards.length ? '' : ' unread'}" style="left:${(r.box.x / fw * 100).toFixed(1)}%;top:${(r.box.y / fh * 100).toFixed(1)}%;width:${(r.box.w / fw * 100).toFixed(1)}%;height:${(r.box.h / fh * 100).toFixed(1)}%"></span>`).join('') +
+      dots.map(d => {
+        const isNew = newIds.includes(d.id); if (isNew) newIds.splice(newIds.indexOf(d.id), 1);
+        return `<span class="dot${isNew ? ' new' : ''}" style="left:${(d.x * 100).toFixed(1)}%;top:${(d.y * 100).toFixed(1)}%">${BY_ID[d.id].label}</span>`;
+      }).join('');
+    return added;
+  }
+
+  function liveGive(id, toMe) {
+    const t = target();
+    if (!camCfg.zone) {
+      if (t == null) return;
+      giveCard(t, id); cardDone(t); return;
+    }
+    if (toMe) {
+      giveCard(state.me, id);
+      if (t === state.me) cardDone(state.me);
+      return;
+    }
+    if (t != null && t !== state.me) { giveCard(t, id); cardDone(t); return; }
+    // It's my turn but the card landed outside my zone: play has moved on, so it goes to the next player still in
+    const n = state.players.length;
+    for (let k = 1; k < n; k++) { const i = (state.me + k) % n; if (isActive(i)) { state.forced = []; state.turn = i; giveCard(i, id); cardDone(i); return; } }
+  }
+
+  function cameraSettings() {
+    const el = document.getElementById('sheet');
+    const opt = (list, cur) => list.map(([v, l]) => `<option value="${v}"${String(v) === String(cur) ? ' selected' : ''}>${l}</option>`).join('');
+    el.innerHTML = `<div class="sheet-bg"><div class="sheet setup">
+      <h3>Live camera settings</h3>
+      <p>Cards are recognised on this phone — nothing is uploaded. Boxes on the picture show what it thinks are cards (dashed = found but couldn’t read the number). If cards aren’t boxed, or bits of table or glare are, adjust “Card vs table” below.</p>
+      <div class="row"><span class="lbl">Scan every</span><select id="cEvery">${opt([[1, '1 second'], [2, '2 seconds'], [3, '3 seconds'], [5, '5 seconds']], camCfg.every)}</select></div>
+      <div class="row"><span class="lbl">My cards</span><select id="cZone">${opt([[1, 'are in the zone at the bottom of the picture'], [0, 'no zone — follow turn order only']], camCfg.zone ? 1 : 0)}</select></div>
+      <div class="row"><span class="lbl">Zone size</span><select id="cZoneY">${opt([[0.8, 'bottom 20%'], [0.7, 'bottom 30%'], [0.65, 'bottom 35%'], [0.55, 'bottom 45%'], [0.5, 'bottom half']], camCfg.zoneY)}</select></div>
+      <div class="row"><span class="lbl">Room light</span><select id="cV">${opt([[0.3, 'dim'], [0.42, 'normal'], [0.55, 'bright']], camCfg.vMin)}</select></div>
+      <div class="row"><span class="lbl">Card vs table</span><select id="cS">${opt([[0.2, 'pick up more (table is pale / grey)'], [0.26, 'more'], [0.32, 'a bit more'], [0.36, 'normal (wood table)'], [0.42, 'a bit less'], [0.48, 'pick up less (glare boxed as cards)']], camCfg.delta)}</select></div>
+      <p class="note">Tips: prop the phone up so it sees the whole table, with your cards nearest the camera and the cards spread out (not overlapping). Good, even light helps a lot. Keep the draw and discard piles out of view. A card is added once two scans in a row agree. The special Unlucky 7 / Lucky 13 and the ÷2 card are hard to tell apart from plain cards — check those by hand.</p>
+      <button class="go" id="cSave">Save</button>
+      <button class="cancel">Cancel</button>
+    </div></div>`;
+    el.querySelector('.cancel').onclick = closeSheet;
+    el.querySelector('#cSave').onclick = () => {
+      camCfg.every = +el.querySelector('#cEvery').value;
+      camCfg.zone = el.querySelector('#cZone').value === '1';
+      camCfg.zoneY = +el.querySelector('#cZoneY').value;
+      camCfg.vMin = +el.querySelector('#cV').value;
+      camCfg.delta = +el.querySelector('#cS').value;
+      saveCam(); closeSheet(); layoutZone();
+      if (vision) { vision.prev = null; vision.regions = []; }
+    };
+  }
+
+  $('camBtn').onclick = () => { if (!state) return; vision ? stopCamera() : startCamera(); };
+  $('camStop').onclick = stopCamera;
+  $('camSettings').onclick = cameraSettings;
+  $('camPause').onclick = () => {
+    if (!vision) return;
+    vision.paused = !vision.paused; vision.prev = null;
+    $('camPause').textContent = vision.paused ? 'Resume' : 'Pause';
+    setCamStatus(vision.paused ? 'Paused' : 'Watching the table…');
+  };
+
 
   // ---------- Wire up ----------
   $('stayBtn').onclick = () => { if (state.turn == null || state.forced.length) return; snapshot(); const i = state.turn; stay(i); commit(); toast(pname(i) + ' stays'); };
