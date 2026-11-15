@@ -4,6 +4,9 @@ A one-page helper for **Flip 7: With a Vengeance**. Tap the cards as they come o
 
 Live page (once GitHub Pages is on): https://dagal10.github.io/flip7cheat/
 
+- Set up the players in turn order and pick your seat; each card you tap goes to whoever's turn it is, and the turn moves on automatically.
+- Action cards (Flip Four, Just One More, Freeze, Swap, Steal, Discard) walk you through picking targets and cards. Any card on the table can be moved, swapped, discarded or removed.
+- Keeps round scores and running totals to 200.
 - Tracks the full 108-card deck: numbers 0–13 (with the Unlucky 7 and Lucky 13), −2/−4/−6/−8/−10, ÷2 and 10 action cards.
 - Applies the special cards: the Unlucky 7 discards your other number and modifier cards; the Lucky 13 lets you hold a second 13; holding the 0 means you score 0 unless you Flip 7, so you must keep hitting.
 - Cards stay out of the deck across rounds until you hit **Reshuffle deck**, as in the real game.
