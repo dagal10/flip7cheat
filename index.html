@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Flip 7 Odds</title>
-<meta name="description" content="Track the Flip 7 deck and get hit/stand odds.">
+<title>Flip 7 Vengeance Odds</title>
+<meta name="description" content="Track the Flip 7: With a Vengeance deck and get hit/stand odds.">
 <meta name="theme-color" content="#14161c">
 <style>
   :root {
@@ -35,6 +35,7 @@
   .verdict.hit { background: var(--hit); color: #052e14; }
   .verdict.stand { background: var(--stand); color: #3b2300; }
   .verdict.bust { background: var(--bust); color: #fff; }
+  .verdict.must { background: #a855f7; color: #fff; font-size: 24px; }
   .verdict.idle { background: var(--panel2); color: var(--muted); font-size: 20px; }
   .stats { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; }
   .stats b { font-size: 18px; }
@@ -50,15 +51,15 @@
   h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 14px 0 6px; }
 
   .grid { display: grid; gap: 6px; }
-  .nums { grid-template-columns: repeat(7, 1fr); }
-  .mods { grid-template-columns: repeat(6, 1fr); }
-  .acts { grid-template-columns: repeat(3, 1fr); }
+    .nums { grid-template-columns: repeat(8, 1fr); }
+  .mods { grid-template-columns: repeat(7, 1fr); }
   .card { background: var(--panel2); border-radius: 10px; padding: 8px 2px 6px; text-align: center;
     user-select: none; position: relative; transition: transform .06s; }
   .card:active { transform: scale(.94); }
   .card .v { font-size: 22px; font-weight: 800; display: block; line-height: 1.1; }
   .card .c { font-size: 11px; color: var(--muted); display: block; }
-  .card.mod .v { color: #fbbf24; font-size: 18px; }
+  .card.mod .v { color: #f87171; font-size: 18px; }
+  .card.special .v { color: #fbbf24; }
   .card.act .v { font-size: 14px; color: #c4b5fd; padding: 4px 0; }
   .card.mine { outline: 2px solid var(--accent); }
   .card.danger { background: var(--danger-bg); }
@@ -68,7 +69,8 @@
   .hand { display: flex; flex-wrap: wrap; gap: 6px; min-height: 44px; padding: 8px;
     background: var(--panel); border-radius: var(--radius); }
   .chip { background: #1e3a8a; border-radius: 8px; padding: 6px 10px; font-weight: 700; font-size: 18px; }
-  .chip.mod { background: #4a3a0b; color: #fbbf24; }
+  .chip.mod { background: #4a1b1b; color: #f87171; }
+  .chip.special { color: #fbbf24; }
   .chip.act { background: #3b2f63; color: #c4b5fd; font-size: 14px; }
   .hand .none { color: var(--muted); align-self: center; font-size: 13px; }
 
@@ -84,8 +86,8 @@
   .toast.show { opacity: 1; }
 
   @media (max-width: 420px) {
-    .nums { grid-template-columns: repeat(5, 1fr); }
-    .mods { grid-template-columns: repeat(3, 1fr); }
+    .nums { grid-template-columns: repeat(4, 1fr); }
+    .mods { grid-template-columns: repeat(4, 1fr); }
     .verdict { font-size: 26px; min-width: 90px; }
   }
 </style>
@@ -101,10 +103,8 @@
 
 <h2>Numbers <span class="sub" style="text-transform:none;letter-spacing:0">— tap to add · count = left in deck</span></h2>
 <div class="grid nums" id="nums"></div>
-<h2>Modifiers</h2>
+<h2>Modifiers &amp; actions</h2>
 <div class="grid mods" id="mods"></div>
-<h2>Actions</h2>
-<div class="grid acts" id="acts"></div>
 
 <h2>My hand <span class="sub" style="text-transform:none;letter-spacing:0">— tap a card to remove it</span></h2>
 <div class="hand" id="hand"></div>
@@ -118,33 +118,38 @@
 
 <details class="info">
   <summary>How to use / how it works</summary>
-  <p><b>Table / Discard:</b> tap every card you see come out for other players (and anything discarded). <b>My Hand:</b> tap the cards dealt to you. The deck isn't reshuffled between rounds in Flip 7, so cards keep counting until the draw pile runs out.</p>
-  <p><b>End round</b> moves your hand to the discard pile (still out of the deck). <b>Reshuffle deck</b> when the draw pile runs out — it puts all seen cards back, keeping only what's currently in your hand out. <b>New game</b> resets everything.</p>
-  <p>If you add a number you already have, the app treats it as a bust — or, if you hold a Second Chance, uses it automatically.</p>
-  <p><b>Recommendation</b> comes from an optimal look-ahead: it computes the expected score of hitting and then continuing to play perfectly (stop when standing is worth more) against the exact remaining deck, including x2, +modifiers, Second Chance and the +15 Flip 7 bonus. Freeze and Flip Three are assumed to be given to an opponent. It maximizes your expected round score only — if you're far behind near 200, lean toward hitting; if you're about to win, lean toward standing.</p>
+  <p>Built for <b>Flip 7: With a Vengeance</b> (108 cards): one each of 0 and 1, then <i>n</i> copies of each number up to thirteen 13s (one 7 is the <b>Unlucky 7</b>, one 13 is the <b>Lucky 13</b>), one each of −2, −4, −6, −8, −10 and ÷2, and 10 action cards.</p>
+  <p><b>Table / Discard:</b> tap every card you see come out for other players (and anything discarded). <b>My Hand:</b> tap the cards in front of you. Cards stay out of the deck between rounds until the draw pile runs out.</p>
+  <p>If a Swap, Steal or Discard changes your hand, tap a chip in "My hand" to remove a card, or add the new one in My Hand mode. Removing a chip puts that card back in the deck; if it went to the discard pile, also tap it in Table mode.</p>
+  <p>In My Hand mode the app applies the special cards for you. <b>Unlucky 7</b> discards your other number and modifier cards. <b>Lucky 13</b> lets you hold a second 13; a third 13 busts. A duplicate number busts.</p>
+  <p><b>Scoring used:</b> add your number cards, apply ÷2 (rounded down), subtract the negatives, never below 0. Seven number cards = Flip 7, +15. Holding the <b>0</b> makes your round score 0 unless you Flip 7, and you must keep hitting.</p>
+  <p><b>Recommendation</b> comes from an optimal look-ahead: the expected score of hitting and then playing perfectly against the exact remaining deck. Action cards are assumed to be played on opponents. It maximizes your expected round score only. If you're far behind near 200, lean toward hitting; if you're about to win, lean toward standing.</p>
 </details>
 
 <div class="toast" id="toast"></div>
 
 <script>
 (() => {
-  // ---------- Deck definition ----------
+  // ---------- Deck definition (Flip 7: With a Vengeance, 108 cards) ----------
   const CARDS = [];
-  for (let n = 0; n <= 12; n++) CARDS.push({ id: 'n' + n, kind: 'num', n, label: String(n), total: n === 0 ? 1 : n });
-  const MODS = [2, 4, 6, 8, 10];
-  MODS.forEach((m, j) => CARDS.push({ id: 'p' + m, kind: 'mod', add: m, bit: j, label: '+' + m, total: 1 }));
-  CARDS.push({ id: 'x2', kind: 'mod', mult: true, bit: 5, label: '×2', total: 1 });
-  CARDS.push({ id: 'frz', kind: 'act', label: 'Freeze', total: 3 });
-  CARDS.push({ id: 'f3', kind: 'act', label: 'Flip Three', total: 3 });
-  CARDS.push({ id: 'sc', kind: 'act', label: '2nd Chance', total: 3 });
+  for (let n = 0; n <= 13; n++) {
+    let total = n === 0 ? 1 : n;
+    if (n === 7 || n === 13) total -= 1; // one 7 is Unlucky, one 13 is Lucky
+    CARDS.push({ id: 'n' + n, kind: 'num', v: n, label: String(n), total });
+  }
+  CARDS.push({ id: 'u7', kind: 'num', v: 7, special: true, label: '7☠', tag: 'Unlucky', total: 1 });
+  CARDS.push({ id: 'l13', kind: 'num', v: 13, special: true, label: '13★', tag: 'Lucky', total: 1 });
+  const NEG = [2, 4, 6, 8, 10];
+  NEG.forEach((m, j) => CARDS.push({ id: 'm' + m, kind: 'mod', sub: m, bit: j, label: '−' + m, total: 1 }));
+  CARDS.push({ id: 'd2', kind: 'mod', div: true, bit: 5, label: '÷2', total: 1 });
+  CARDS.push({ id: 'act', kind: 'act', label: 'Action', total: 10 });
   const BY_ID = Object.fromEntries(CARDS.map(c => [c.id, c]));
-  const MOD_CARDS = CARDS.filter(c => c.kind === 'mod');
 
   // ---------- State ----------
-  const KEY = 'flip7odds.v1';
+  const KEY = 'flip7vengeance.v1';
   let state = load() || fresh();
   function fresh() { return { seen: {}, hand: [], history: [], mode: 'table' }; }
-  function load() { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } }
+  function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); return s && s.seen ? s : null; } catch { return null; } }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
   function snapshot() {
     state.history.push(JSON.stringify({ seen: state.seen, hand: state.hand }));
@@ -154,6 +159,7 @@
   const handCount = id => state.hand.filter(x => x === id).length;
   const remaining = id => BY_ID[id].total - (state.seen[id] || 0) - handCount(id);
   const addSeen = (id, k = 1) => { state.seen[id] = (state.seen[id] || 0) + k; };
+  const handVals = v => state.hand.filter(id => BY_ID[id].kind === 'num' && BY_ID[id].v === v).length;
 
   // ---------- Actions ----------
   function tapCard(id) {
@@ -161,48 +167,42 @@
     snapshot();
     const c = BY_ID[id];
     if (state.mode === 'table') { addSeen(id); }
-    else if (c.kind === 'num' && state.hand.includes(id)) {
-      if (state.hand.includes('sc')) {
-        // Second Chance: discard the duplicate and the Second Chance
-        state.hand.splice(state.hand.indexOf('sc'), 1);
-        addSeen('sc'); addSeen(id);
-        toast('Second Chance used — duplicate ' + c.label + ' discarded');
-      } else {
-        state.hand.push(id);
-        toast('BUST! Tap "End round" when done.');
-      }
-    } else if (id === 'sc' && state.hand.includes('sc')) {
-      addSeen(id); toast('Already holding a Second Chance — counted as given away');
-    } else if (c.kind === 'act' && id !== 'sc') {
-      addSeen(id); toast(c.label + ' counted as played');
+    else if (c.kind === 'act') { addSeen(id); toast('Action card counted as played'); }
+    else if (id === 'u7') {
+      const keep = [];
+      for (const h of state.hand) { const k = BY_ID[h].kind; if (k === 'num' || k === 'mod') addSeen(h); else keep.push(h); }
+      state.hand = keep; state.hand.push(id);
+      toast('Unlucky 7! Other number & modifier cards discarded');
+    } else if (c.kind === 'num') {
+      const have = handVals(c.v);
+      let bust = false;
+      if (c.v === 13) {
+        const lucky = state.hand.includes('l13') || id === 'l13';
+        bust = have >= 2 || (have === 1 && !lucky);
+        if (!bust && have === 1) toast('Lucky 13 — second 13 is safe');
+      } else bust = have >= 1;
+      state.hand.push(id);
+      if (bust) toast('BUST! Tap "End round" when done.');
     } else {
       state.hand.push(id);
     }
     commit();
   }
-  function removeFromHand(i) {
-    snapshot();
-    state.hand.splice(i, 1);
-    commit();
-  }
+  function removeFromHand(i) { snapshot(); state.hand.splice(i, 1); commit(); }
   function undo() {
     const h = state.history.pop();
     if (!h) { toast('Nothing to undo'); return; }
-    Object.assign(state, JSON.parse(h));
-    commit();
+    Object.assign(state, JSON.parse(h)); commit();
   }
   function endRound() {
     snapshot();
     state.hand.forEach(id => addSeen(id));
     state.hand = [];
-    state.mode = 'hand';
     commit(); toast('Round ended — your cards moved to discard');
   }
   function reshuffle() {
     if (!confirm('Reshuffle: put all discarded/seen cards back into the deck?')) return;
-    snapshot();
-    state.seen = {};
-    commit(); toast('Deck reshuffled');
+    snapshot(); state.seen = {}; commit(); toast('Deck reshuffled');
   }
   function newGame() {
     if (!confirm('Start a new game? This clears everything.')) return;
@@ -211,94 +211,112 @@
   function commit() { save(); render(); }
 
   // ---------- Solver ----------
+  // State bits: nm = number values held (bits 0..13), T = holding a second 13,
+  // L = holding the Lucky 13, U = Unlucky 7 already drawn, G = Lucky 13 already drawn, mm = modifiers (6 bits)
+  let DEPTH = 6;
+  const T = 1 << 14, L = 1 << 15, U = 1 << 16, G = 1 << 17, MSH = 18, NM = (1 << 14) - 1;
   function popcount(x) { let c = 0; while (x) { x &= x - 1; c++; } return c; }
+  const numCount = s => popcount(s & NM) + (s & T ? 1 : 0);
 
-  function scoreOf(nm, mm) {
-    let s = 0;
-    for (let n = 1; n <= 12; n++) if (nm >> n & 1) s += n;
-    if (mm >> 5 & 1) s *= 2;
-    for (let j = 0; j < 5; j++) if (mm >> j & 1) s += MODS[j];
-    return s;
+  function rawScore(s) {
+    let sum = 0;
+    for (let v = 1; v <= 13; v++) if (s >> v & 1) sum += v;
+    if (s & T) sum += 13;
+    const mm = s >>> MSH;
+    if (mm >> 5 & 1) sum = Math.floor(sum / 2);
+    for (let j = 0; j < 5; j++) if (mm >> j & 1) sum -= NEG[j];
+    return Math.max(0, sum);
+  }
+  const standScore = s => (s & 1) ? 0 : rawScore(s); // holding the 0 = score 0 unless Flip 7
+
+  // Returns next state, or -1 for bust
+  function draw(s, t) {
+    if (t.kind === 'mod') return s | (1 << (MSH + t.bit));
+    if (t.id === 'u7') return (s & G) | U | (1 << 7);
+    const has = s >> t.v & 1;
+    if (t.v === 13) {
+      const lucky = t.id === 'l13';
+      const ns = lucky ? s | L | G : s;
+      if (!has) return ns | (1 << 13);
+      if (!(s & T) && (ns & L)) return ns | T;
+      return -1;
+    }
+    return has ? -1 : s | (1 << t.v);
   }
 
   function analyze() {
     const R = {}; let N = 0;
     for (const c of CARDS) { R[c.id] = Math.max(0, remaining(c.id)); N += R[c.id]; }
 
-    let nm0 = 0, mm0 = 0, dupInHand = false;
+    // Encode my hand
+    let s0 = 0, bust = false; const cnt = {};
     for (const id of state.hand) {
       const c = BY_ID[id];
-      if (c.kind === 'num') { if (nm0 >> c.n & 1) dupInHand = true; nm0 |= 1 << c.n; }
-      else if (c.kind === 'mod') mm0 |= 1 << c.bit;
+      if (c.kind === 'num') {
+        cnt[c.v] = (cnt[c.v] || 0) + 1;
+        if (cnt[c.v] === 2 && c.v === 13) s0 |= T; else if (cnt[c.v] >= 2) bust = true;
+        s0 |= 1 << c.v;
+        if (id === 'l13') s0 |= L | G;
+        if (id === 'u7') s0 |= U;
+      } else if (c.kind === 'mod') s0 |= 1 << (MSH + c.bit);
     }
-    const sc0 = state.hand.includes('sc') ? 1 : 0;
-    const S0 = scoreOf(nm0, mm0);
-    const uniq = popcount(nm0);
+    if ((cnt[13] || 0) >= 3 || ((s0 & T) && !(s0 & L))) bust = true;
+    if (!R.u7) s0 |= U;
+    if (!R.l13) s0 |= G;
+    if (bust) return { status: 'bust' };
+    if (numCount(s0) >= 7) return { status: 'flip7', score: rawScore(s0) + 15 };
+    if (N - R.act === 0) return { status: 'empty' };
 
-    if (dupInHand) return { status: 'bust' };
-    if (uniq >= 7) return { status: 'flip7', score: S0 + 15 };
-    if (N === 0) return { status: 'empty' };
+    const types = CARDS.filter(c => c.kind !== 'act');
+    const nm0 = s0 & NM;
+    // Remaining count of a card type in the look-ahead state (cards drawn since now are gone)
+    function avail(s, t) {
+      if (t.kind === 'mod') return (s >>> (MSH + t.bit)) & 1 ? 0 : R[t.id];
+      if (t.id === 'u7') return s & U ? 0 : R.u7;
+      if (t.id === 'l13') return s & G ? 0 : R.l13;
+      const drawnNow = (s >> t.v & 1) && !(nm0 >> t.v & 1) && t.v !== 7 && t.v !== 13 ? 1 : 0;
+      return Math.max(0, R[t.id] - drawnNow);
+    }
 
-    // Next-card odds (raw, includes action cards in denominator)
-    let dup = 0;
-    for (let n = 0; n <= 12; n++) if (nm0 >> n & 1) dup += R['n' + n];
-    const pBust = sc0 ? 0 : dup / N;
-    const pDup = dup / N;
-
-    // Optimal look-ahead: V(state) = max(stand, E[V(after hit)])
-    // State = numbers bitmask (13) | modifiers bitmask (6) | second chance (2 bits: 0 none, 1 holding, 2 used up)
-    const memo = new Float64Array(1 << 21).fill(-1);
-    const rNum = [], rMod = [];
-    for (let n = 0; n <= 12; n++) rNum[n] = R['n' + n];
-    for (const c of MOD_CARDS) rMod[c.bit] = R[c.id];
-    const rSC = R.sc;
-
-    function hitEV(nm, mm, sc) {
+    const memo = new Map();
+    function hitEV(s, d) {
       let tot = 0, acc = 0;
-      for (let n = 0; n <= 12; n++) {
-        const have = nm >> n & 1;
-        // cards drawn during look-ahead are removed from the deck
-        const r = rNum[n] - (have && !(nm0 >> n & 1) ? 1 : 0);
-        if (r <= 0) continue;
+      for (const t of types) {
+        const r = avail(s, t); if (!r) continue;
         tot += r;
-        if (have) { if (sc === 1) acc += r * V(nm, mm, 2); }
-        else {
-          const nn = nm | (1 << n);
-          acc += r * (popcount(nn) >= 7 ? scoreOf(nn, mm) + 15 : V(nn, mm, sc));
-        }
+        const ns = draw(s, t);
+        if (ns < 0) continue; // bust = 0
+        acc += r * (numCount(ns) >= 7 ? rawScore(ns) + 15 : V(ns, d + 1));
       }
-      for (let j = 0; j < 6; j++) {
-        if (mm >> j & 1) continue;
-        const r = rMod[j];
-        if (r <= 0) continue;
-        tot += r; acc += r * V(nm, mm | (1 << j), sc);
-      }
-      if (sc === 0 && rSC > 0) { tot += rSC; acc += rSC * V(nm, mm, 1); }
-      // Freeze / Flip Three / extra 2nd Chance = neutral (given away), so condition them out
-      return tot ? acc / tot : scoreOf(nm, mm);
+      return tot ? acc / tot : standScore(s);
     }
-    function V(nm, mm, sc) {
-      const key = nm | (mm << 13) | (sc << 19);
-      if (memo[key] >= 0) return memo[key];
-      const v = Math.max(scoreOf(nm, mm), hitEV(nm, mm, sc));
-      memo[key] = v; return v;
+    // Look-ahead is capped at DEPTH more cards (beyond that, assume you stand) to stay fast on phones
+    function V(s, d) {
+      if (d >= DEPTH) return standScore(s);
+      const key = s * 8 + d;
+      let v = memo.get(key);
+      if (v !== undefined) return v;
+      v = (s & 1) ? hitEV(s, d) : Math.max(standScore(s), hitEV(s, d));
+      memo.set(key, v); return v;
     }
 
-    const evHit = hitEV(nm0, mm0, sc0);
-
-    // One-card expected value (hit once then stand) for reference
-    let tot1 = 0, acc1 = 0, pF7 = 0;
-    for (let n = 0; n <= 12; n++) {
-      const r = rNum[n]; if (!r) continue; tot1 += r;
-      if (nm0 >> n & 1) { acc1 += r * (sc0 ? S0 : 0); }
-      else { const nn = nm0 | 1 << n; const f7 = popcount(nn) >= 7; if (f7) pF7 += r; acc1 += r * (scoreOf(nn, mm0) + (f7 ? 15 : 0)); }
+    // Next-card odds (denominator includes action cards)
+    let bustCards = 0, f7 = 0, tot1 = 0, acc1 = 0;
+    for (const t of types) {
+      const r = R[t.id]; if (!r) continue;
+      const ns = draw(s0, t);
+      tot1 += r;
+      if (ns < 0) { bustCards += r; continue; }
+      if (numCount(ns) >= 7) { f7 += r; acc1 += r * (rawScore(ns) + 15); }
+      else acc1 += r * standScore(ns);
     }
-    for (let j = 0; j < 6; j++) if (!(mm0 >> j & 1) && rMod[j]) { tot1 += rMod[j]; acc1 += rMod[j] * scoreOf(nm0, mm0 | 1 << j); }
-    if (!sc0 && rSC) { tot1 += rSC; acc1 += rSC * S0; }
-    const ev1 = tot1 ? acc1 / tot1 : S0;
-
-    return { status: 'ok', N, dup, pBust, pDup, sc: sc0, S: S0, evHit, ev1, uniq, pF7: pF7 / N,
-      hit: evHit > S0 + 1e-9 };
+    const S = standScore(s0);
+    const evHit = hitEV(s0, 0);
+    return {
+      status: 'ok', N, bustCards, pBust: bustCards / N, pF7: f7 / N, S, evHit,
+      ev1: tot1 ? acc1 / tot1 : S, uniq: numCount(s0), zero: !!(s0 & 1),
+      hit: evHit > S + 1e-9, states: memo.size
+    };
   }
 
   // ---------- Render ----------
@@ -307,29 +325,30 @@
 
   function cardBtn(c) {
     const b = document.createElement('button');
-    b.className = 'card ' + c.kind;
+    b.className = 'card ' + c.kind + (c.special ? ' special' : '');
     const r = remaining(c.id);
     const mine = state.hand.includes(c.id);
     if (mine) b.classList.add('mine');
-    if (c.kind === 'num' && mine) b.classList.add('danger');
+    if (c.kind === 'num' && handVals(c.v) > 0 && !(c.v === 13 && state.hand.includes('l13') && handVals(13) < 2) && c.id !== 'u7') b.classList.add('danger');
     if (r <= 0) b.classList.add('empty');
-    b.innerHTML = `<span class="v">${c.label}</span><span class="c">${r}/${c.total}</span>`;
+    b.innerHTML = `<span class="v">${c.label}</span><span class="c">${c.tag ? c.tag + ' ' : ''}${r}/${c.total}</span>`;
     b.onclick = () => tapCard(c.id);
     return b;
   }
 
   function render() {
     document.querySelectorAll('.mode button').forEach(b => b.classList.toggle('on', b.dataset.mode === state.mode));
-    for (const [el, kind] of [['nums', 'num'], ['mods', 'mod'], ['acts', 'act']]) {
-      const box = $(el); box.innerHTML = '';
-      CARDS.filter(c => c.kind === kind).forEach(c => box.appendChild(cardBtn(c)));
-    }
+    const nums = $('nums'); nums.innerHTML = '';
+    CARDS.filter(c => c.kind === 'num').forEach(c => nums.appendChild(cardBtn(c)));
+    const mods = $('mods'); mods.innerHTML = '';
+    CARDS.filter(c => c.kind !== 'num').forEach(c => mods.appendChild(cardBtn(c)));
+
     const hand = $('hand'); hand.innerHTML = '';
     if (!state.hand.length) hand.innerHTML = '<span class="none">Switch to "My Hand" and tap your cards</span>';
     state.hand.forEach((id, i) => {
       const c = BY_ID[id];
       const b = document.createElement('button');
-      b.className = 'chip ' + c.kind; b.textContent = c.label;
+      b.className = 'chip ' + c.kind + (c.special ? ' special' : ''); b.textContent = c.label;
       b.onclick = () => removeFromHand(i);
       hand.appendChild(b);
     });
@@ -339,22 +358,23 @@
     if (a.status === 'bust') {
       html = banner('bust', 'BUST', '<b>Duplicate number</b>', 'You score 0 this round. Tap “End round”.');
     } else if (a.status === 'flip7') {
-      html = banner('hit', 'FLIP 7!', `<span>Score <b>${a.score}</b></span>`, '7 unique numbers — round over, +15 bonus included.');
+      html = banner('hit', 'FLIP 7!', `<span>Score <b>${a.score}</b></span>`, '7 number cards — round over, +15 bonus included.');
     } else if (a.status === 'empty') {
       html = banner('idle', '—', '<span>Deck empty</span>', 'Tap “Reshuffle deck”.');
     } else {
-      const v = a.hit ? 'hit' : 'stand';
+      const v = a.zero ? 'must' : a.hit ? 'hit' : 'stand';
+      const word = a.zero ? 'MUST HIT' : v.toUpperCase();
       const stats = `
         <span>Bust <b style="color:${a.pBust > 0.3 ? 'var(--bust)' : 'inherit'}">${pct(a.pBust)}</b></span>
         <span>Now <b>${a.S}</b></span>
         <span>Hit EV <b>${a.evHit.toFixed(1)}</b></span>`;
       const extra = [
-        `${a.dup} of ${a.N} cards left would bust you`,
-        a.sc ? 'you hold a Second Chance (' + pct(a.pDup) + ' to use it)' : '',
+        a.zero ? 'holding the 0 — you score 0 unless you Flip 7' : '',
+        `${a.bustCards} of ${a.N} cards left would bust you`,
         a.uniq === 6 ? pct(a.pF7) + ' to Flip 7 next card' : '',
         `1-card EV ${a.ev1.toFixed(1)}`
       ].filter(Boolean).join(' · ');
-      html = banner(v, v.toUpperCase(), stats, extra);
+      html = banner(v, word, stats, extra);
     }
     $('rec').innerHTML = html;
   }
@@ -365,12 +385,12 @@
   let tt;
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 1800); }
 
-  // ---------- Wire up ----------
   document.querySelectorAll('.mode button').forEach(b => b.onclick = () => { state.mode = b.dataset.mode; commit(); });
   $('undo').onclick = undo;
   $('endRound').onclick = endRound;
   $('reshuffle').onclick = reshuffle;
   $('newGame').onclick = newGame;
+  window.__analyze = analyze; window.__depth = d => { DEPTH = d; };
   render();
 })();
 </script>
